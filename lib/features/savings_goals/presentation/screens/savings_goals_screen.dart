@@ -51,8 +51,12 @@ class SavingsGoalsScreen extends ConsumerWidget {
             child: ListView.builder(
               padding: const EdgeInsets.all(20),
               itemCount: goals.length,
-              itemBuilder: (context, index) =>
-                  _GoalCard(goal: goals[index]),
+              itemBuilder: (context, index) => _GoalCard(
+                goal: goals[index],
+                onAddFunds: (id, amount) => ref
+                    .read(savingsGoalsProvider.notifier)
+                    .addFunds(id, amount),
+              ),
             ),
           );
         },
@@ -75,8 +79,10 @@ class SavingsGoalsScreen extends ConsumerWidget {
 
 class _GoalCard extends StatelessWidget {
   final SavingsGoal goal;
+  final void Function(String id, int amount)? _onAddFunds;
 
-  const _GoalCard({required this.goal});
+  const _GoalCard({required this.goal, void Function(String, int)? onAddFunds})
+      : _onAddFunds = onAddFunds;
 
   @override
   Widget build(BuildContext context) {
@@ -173,8 +179,61 @@ class _GoalCard extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
+            if (goal.progress < 1.0) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => _showAddFundsDialog(context, goal),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Abonar'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.accent,
+                    side: const BorderSide(color: AppColors.accent),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
+      ),
+    );
+  }
+
+  void _showAddFundsDialog(BuildContext context, SavingsGoal goal) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.card,
+        title: const Text('Abonar a meta'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(hintText: 'Monto (ej: 100.00)'),
+          style: const TextStyle(color: AppColors.textPrimary),
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancelar',
+                style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () {
+              final amount = double.tryParse(controller.text.trim());
+              if (amount == null || amount <= 0) return;
+              _onAddFunds?.call(goal.id, (amount * 100).round());
+              Navigator.of(ctx).pop();
+            },
+            child: const Text('Abonar',
+                style: TextStyle(color: AppColors.accent)),
+          ),
+        ],
       ),
     );
   }

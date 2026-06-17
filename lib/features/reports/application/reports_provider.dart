@@ -1,54 +1,68 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../domain/report_model.dart';
+import '../data/analytics_repository.dart';
 
 final categorySpendingProvider =
     FutureProvider<List<CategorySpending>>((ref) async {
-  // TODO: Replace with analytics API call
-  await Future.delayed(const Duration(milliseconds: 400));
-  return const [
-    CategorySpending(
-        categoryName: 'Alimentacion', categoryIcon: 'restaurant',
-        totalAmount: 45000, percentage: 35),
-    CategorySpending(
-        categoryName: 'Transporte', categoryIcon: 'directions_car',
-        totalAmount: 20000, percentage: 15.5),
-    CategorySpending(
-        categoryName: 'Entretenimiento', categoryIcon: 'movie',
-        totalAmount: 18000, percentage: 14),
-    CategorySpending(
-        categoryName: 'Suscripciones', categoryIcon: 'autorenew',
-        totalAmount: 12000, percentage: 9.3),
-    CategorySpending(
-        categoryName: 'Salud', categoryIcon: 'local_hospital',
-        totalAmount: 15000, percentage: 11.6),
-    CategorySpending(
-        categoryName: 'Otros', categoryIcon: 'more_horiz',
-        totalAmount: 19000, percentage: 14.6),
-  ];
+  final repo = ref.read(analyticsRepositoryProvider);
+  final now = DateTime.now();
+  final start = DateTime(now.year, now.month, 1);
+  final end = DateTime(now.year, now.month + 1, 0);
+
+  final data = await repo.spendingByCategory(
+    start.toIso8601String(),
+    end.toIso8601String(),
+  );
+
+  final totalSpent = data.fold<int>(
+    0,
+    (sum, d) => sum + (d['totalAmount'] as int? ?? 0),
+  );
+
+  return data.map((d) {
+    final amount = d['totalAmount'] as int? ?? 0;
+    return CategorySpending(
+      categoryName: d['categoryName'] as String? ?? '',
+      categoryIcon: d['categoryIcon'] as String? ?? 'more_horiz',
+      totalAmount: amount,
+      percentage: totalSpent > 0 ? (amount / totalSpent * 100) : 0,
+    );
+  }).toList();
 });
 
 final monthlyComparisonProvider =
     FutureProvider<List<MonthlyComparison>>((ref) async {
-  await Future.delayed(const Duration(milliseconds: 400));
-  return const [
-    MonthlyComparison(month: 'Ene', income: 500000, expense: 380000),
-    MonthlyComparison(month: 'Feb', income: 500000, expense: 420000),
-    MonthlyComparison(month: 'Mar', income: 575000, expense: 350000),
-    MonthlyComparison(month: 'Abr', income: 500000, expense: 410000),
-    MonthlyComparison(month: 'May', income: 550000, expense: 390000),
-    MonthlyComparison(month: 'Jun', income: 500000, expense: 365000),
-  ];
+  final repo = ref.read(analyticsRepositoryProvider);
+  final data = await repo.incomeVsExpense(months: 6);
+
+  return data.map((d) {
+    final month = d['month'] as int? ?? 1;
+    return MonthlyComparison(
+      month: _monthLabel(month),
+      income: d['totalIncome'] as int? ?? 0,
+      expense: d['totalExpense'] as int? ?? 0,
+    );
+  }).toList();
 });
 
 final savingsTrendProvider =
     FutureProvider<List<SavingsTrend>>((ref) async {
-  await Future.delayed(const Duration(milliseconds: 400));
-  return const [
-    SavingsTrend(month: 'Ene', amount: 120000),
-    SavingsTrend(month: 'Feb', amount: 80000),
-    SavingsTrend(month: 'Mar', amount: 225000),
-    SavingsTrend(month: 'Abr', amount: 90000),
-    SavingsTrend(month: 'May', amount: 160000),
-    SavingsTrend(month: 'Jun', amount: 135000),
-  ];
+  final repo = ref.read(analyticsRepositoryProvider);
+  final data = await repo.savingsTrend(months: 6);
+
+  return data.map((d) {
+    final month = d['month'] as int? ?? 1;
+    return SavingsTrend(
+      month: _monthLabel(month),
+      amount: d['savedAmount'] as int? ?? 0,
+    );
+  }).toList();
 });
+
+String _monthLabel(int month) {
+  const labels = [
+    '', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+    'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
+  ];
+  return labels[month.clamp(1, 12)];
+}

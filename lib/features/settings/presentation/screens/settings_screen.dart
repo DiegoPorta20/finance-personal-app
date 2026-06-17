@@ -3,13 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../../../auth/application/auth_provider.dart';
+import '../../application/user_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final profileAsync = ref.watch(userProfileProvider);
+    final currency = profileAsync.valueOrNull?['currency'] as String? ?? 'USD';
+    final isDark = ref.watch(themeModeProvider) == ThemeMode.dark;
+    final name = profileAsync.valueOrNull?['name'] as String? ?? '';
+
     return Scaffold(
       appBar: AppBar(title: const Text('Configuracion')),
       body: ListView(
@@ -21,19 +28,20 @@ class SettingsScreen extends ConsumerWidget {
               _SettingsTile(
                 icon: Icons.person_outline,
                 title: 'Perfil',
-                onTap: () {}, // TODO
+                subtitle: name.isNotEmpty ? name : null,
+                onTap: () => context.push('/settings/profile'),
               ),
               _SettingsTile(
                 icon: Icons.attach_money,
                 title: 'Moneda predeterminada',
-                subtitle: 'USD',
-                onTap: () {}, // TODO
+                subtitle: currency,
+                onTap: () => context.push('/settings/profile'),
               ),
               _SettingsTile(
                 icon: Icons.dark_mode_outlined,
                 title: 'Tema',
                 subtitle: 'Oscuro',
-                onTap: () {}, // TODO: Light/dark toggle
+                onTap: () {},
               ),
             ],
           ),
@@ -44,18 +52,18 @@ class SettingsScreen extends ConsumerWidget {
               _SettingsTile(
                 icon: Icons.category_outlined,
                 title: 'Categorias',
-                onTap: () {}, // TODO: Categories management
+                onTap: () => context.push('/settings/categories'),
               ),
               _SettingsTile(
                 icon: Icons.repeat,
                 title: 'Ingresos recurrentes',
-                onTap: () {}, // TODO: Income sources
+                onTap: () => context.push('/income-sources'),
               ),
               _SettingsTile(
                 icon: Icons.pie_chart_outline,
                 title: 'Regla de presupuesto',
                 subtitle: '50/30/20',
-                onTap: () {}, // TODO: Budget rule config
+                onTap: () => context.push('/budget'),
               ),
             ],
           ),
@@ -65,15 +73,8 @@ class SettingsScreen extends ConsumerWidget {
             children: [
               _SettingsTile(
                 icon: Icons.notifications_outlined,
-                title: 'Alertas de gasto',
-                subtitle: 'Activadas',
-                onTap: () {}, // TODO
-              ),
-              _SettingsTile(
-                icon: Icons.calendar_today_outlined,
-                title: 'Recordatorio de cobro',
-                subtitle: 'Activado',
-                onTap: () {}, // TODO
+                title: 'Ver notificaciones',
+                onTap: () => context.push('/notifications'),
               ),
             ],
           ),

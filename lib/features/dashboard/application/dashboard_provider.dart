@@ -21,63 +21,35 @@ class DashboardNotifier extends AsyncNotifier<DashboardData> {
   Future<DashboardData> _fetchData() async {
     final repo = ref.read(dashboardRepositoryProvider);
 
-    try {
-      final results = await Future.wait([
-        repo.getAccounts(),
-        repo.getRecentTransactions(),
-      ]);
+    final results = await Future.wait([
+      repo.getAccounts(),
+      repo.getRecentTransactions(),
+    ]);
 
-      final accounts = results[0] as List<AccountSummary>;
-      final transactions = results[1] as List<RecentTransaction>;
-      final totalBalance =
-          accounts.fold<int>(0, (sum, a) => sum + a.balance);
+    final accounts = results[0] as List<AccountSummary>;
+    final transactions = results[1] as List<RecentTransaction>;
+    final totalBalance =
+        accounts.fold<int>(0, (sum, a) => sum + a.balance);
 
-      return DashboardData(
-        totalBalance: totalBalance,
-        monthlySavingsGoal: 200000, // TODO: from savings goals API
-        monthlySavingsCurrent: 135000, // TODO: calculate from transactions
-        accounts: accounts,
-        recentTransactions: transactions,
-      );
-    } catch (_) {
-      // Fallback to mock if API unavailable
-      return _mockData();
-    }
-  }
+    // Calculate monthly savings from transactions
+    final now = DateTime.now();
+    final monthStart = DateTime(now.year, now.month, 1);
+    final monthTransactions = transactions
+        .where((t) => t.date.isAfter(monthStart))
+        .toList();
+    final monthIncome = monthTransactions
+        .where((t) => t.type == 'income')
+        .fold<int>(0, (sum, t) => sum + t.amount);
+    final monthExpense = monthTransactions
+        .where((t) => t.type == 'expense')
+        .fold<int>(0, (sum, t) => sum + t.amount);
 
-  DashboardData _mockData() {
     return DashboardData(
-      totalBalance: 1250000,
-      monthlySavingsGoal: 200000,
-      monthlySavingsCurrent: 135000,
-      accounts: const [
-        AccountSummary(
-            id: '1', name: 'Banco Principal', type: 'bank',
-            balance: 850000, icon: IconType.bank),
-        AccountSummary(
-            id: '2', name: 'Efectivo', type: 'cash',
-            balance: 250000, icon: IconType.cash),
-        AccountSummary(
-            id: '3', name: 'Billetera Digital', type: 'digital_wallet',
-            balance: 150000, icon: IconType.wallet),
-      ],
-      recentTransactions: [
-        RecentTransaction(
-            id: '1', description: 'Supermercado',
-            categoryName: 'Alimentacion', categoryIcon: 'restaurant',
-            amount: 8500, type: 'expense',
-            date: DateTime.now().subtract(const Duration(hours: 2))),
-        RecentTransaction(
-            id: '2', description: 'Sueldo mensual',
-            categoryName: 'Sueldo fijo', categoryIcon: 'payments',
-            amount: 500000, type: 'income',
-            date: DateTime.now().subtract(const Duration(days: 1))),
-        RecentTransaction(
-            id: '3', description: 'Netflix',
-            categoryName: 'Suscripciones', categoryIcon: 'autorenew',
-            amount: 1599, type: 'expense',
-            date: DateTime.now().subtract(const Duration(days: 2))),
-      ],
+      totalBalance: totalBalance,
+      monthlySavingsGoal: (monthIncome * 0.2).round(),
+      monthlySavingsCurrent: monthIncome - monthExpense,
+      accounts: accounts,
+      recentTransactions: transactions,
     );
   }
 }

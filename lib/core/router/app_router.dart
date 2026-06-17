@@ -9,6 +9,8 @@ import '../../features/reports/presentation/screens/reports_screen.dart';
 import '../../features/budget/presentation/screens/budget_screen.dart';
 import '../../features/savings_goals/presentation/screens/savings_goals_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
+import '../../features/income_sources/presentation/screens/income_sources_screen.dart';
+import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/auth/application/auth_provider.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -56,6 +58,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/income-sources',
+        builder: (context, state) => const IncomeSourcesScreen(),
+      ),
+      GoRoute(
+        path: '/notifications',
+        builder: (context, state) => const NotificationsScreen(),
       ),
     ],
   );

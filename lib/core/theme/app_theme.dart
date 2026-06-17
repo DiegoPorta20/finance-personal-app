@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
+  // Dark
   static const background = Color(0xFF0E0E0F);
   static const card = Color(0xFF1C1C1E);
   static const accent = Color(0xFFA4E832);
@@ -10,6 +11,13 @@ class AppColors {
   static const textSecondary = Color(0xFF9A9A9A);
   static const error = Color(0xFFFF5252);
   static const divider = Color(0xFF2C2C2E);
+
+  // Light
+  static const lightBackground = Color(0xFFF5F5F7);
+  static const lightCard = Colors.white;
+  static const lightTextPrimary = Color(0xFF1C1C1E);
+  static const lightTextSecondary = Color(0xFF8E8E93);
+  static const lightDivider = Color(0xFFE5E5EA);
 }
 
 class AppTheme {
@@ -68,42 +76,102 @@ class AppTheme {
           ),
         ),
       ),
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: AppColors.card,
+        selectedItemColor: AppColors.accent,
+        unselectedItemColor: AppColors.textSecondary,
+      ),
       textTheme: const TextTheme(
         headlineLarge: TextStyle(
-          color: AppColors.textPrimary,
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-        ),
+          color: AppColors.textPrimary, fontSize: 32, fontWeight: FontWeight.bold),
         headlineMedium: TextStyle(
-          color: AppColors.textPrimary,
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
+          color: AppColors.textPrimary, fontSize: 24, fontWeight: FontWeight.bold),
         titleLarge: TextStyle(
-          color: AppColors.textPrimary,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-        ),
+          color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w600),
         titleMedium: TextStyle(
-          color: AppColors.textPrimary,
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-        ),
-        bodyLarge: TextStyle(
-          color: AppColors.textPrimary,
-          fontSize: 16,
-        ),
-        bodyMedium: TextStyle(
-          color: AppColors.textSecondary,
-          fontSize: 14,
-        ),
+          color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w500),
+        bodyLarge: TextStyle(color: AppColors.textPrimary, fontSize: 16),
+        bodyMedium: TextStyle(color: AppColors.textSecondary, fontSize: 14),
         labelLarge: TextStyle(
-          color: AppColors.textPrimary,
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-        ),
+          color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w600),
       ),
       dividerColor: AppColors.divider,
+    );
+  }
+
+  static ThemeData get light {
+    return ThemeData(
+      brightness: Brightness.light,
+      scaffoldBackgroundColor: AppColors.lightBackground,
+      colorScheme: const ColorScheme.light(
+        surface: AppColors.lightCard,
+        primary: AppColors.accent,
+        error: AppColors.error,
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: AppColors.lightBackground,
+        elevation: 0,
+        centerTitle: false,
+        titleTextStyle: TextStyle(
+          color: AppColors.lightTextPrimary,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+        iconTheme: IconThemeData(color: AppColors.lightTextPrimary),
+      ),
+      cardTheme: CardThemeData(
+        color: AppColors.lightCard,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        margin: EdgeInsets.zero,
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.lightCard,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.lightDivider),
+        ),
+        hintStyle: const TextStyle(color: AppColors.lightTextSecondary),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.accent,
+          foregroundColor: Colors.black,
+          minimumSize: const Size(double.infinity, 52),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: AppColors.lightCard,
+        selectedItemColor: AppColors.accent,
+        unselectedItemColor: AppColors.lightTextSecondary,
+      ),
+      textTheme: const TextTheme(
+        headlineLarge: TextStyle(
+          color: AppColors.lightTextPrimary, fontSize: 32, fontWeight: FontWeight.bold),
+        headlineMedium: TextStyle(
+          color: AppColors.lightTextPrimary, fontSize: 24, fontWeight: FontWeight.bold),
+        titleLarge: TextStyle(
+          color: AppColors.lightTextPrimary, fontSize: 18, fontWeight: FontWeight.w600),
+        titleMedium: TextStyle(
+          color: AppColors.lightTextPrimary, fontSize: 16, fontWeight: FontWeight.w500),
+        bodyLarge: TextStyle(color: AppColors.lightTextPrimary, fontSize: 16),
+        bodyMedium: TextStyle(color: AppColors.lightTextSecondary, fontSize: 14),
+        labelLarge: TextStyle(
+          color: AppColors.lightTextPrimary, fontSize: 14, fontWeight: FontWeight.w600),
+      ),
+      dividerColor: AppColors.lightDivider,
     );
   }
 }
