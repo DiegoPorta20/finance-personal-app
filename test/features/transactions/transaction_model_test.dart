@@ -40,16 +40,16 @@ void main() {
     });
 
     test('isIncome returns true for income type', () {
-      const tx = Transaction(
-        id: '1', type: 'income', amount: 100, date: null,
+      final tx = Transaction(
+        id: '1', type: 'income', amount: 100, date: DateTime(2026),
         accountId: 'a', categoryId: 'c',
       );
       expect(tx.isIncome, true);
     });
 
     test('isIncome returns false for expense type', () {
-      const tx = Transaction(
-        id: '1', type: 'expense', amount: 100, date: null,
+      final tx = Transaction(
+        id: '1', type: 'expense', amount: 100, date: DateTime(2026),
         accountId: 'a', categoryId: 'c',
       );
       expect(tx.isIncome, false);
