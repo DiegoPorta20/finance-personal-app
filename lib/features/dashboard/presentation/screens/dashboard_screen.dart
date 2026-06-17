@@ -45,36 +45,6 @@ class DashboardScreen extends ConsumerWidget {
           data: (data) => _DashboardContent(data: data),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: AppColors.card,
-        selectedItemColor: AppColors.accent,
-        unselectedItemColor: AppColors.textSecondary,
-        currentIndex: 0,
-        onTap: (index) {
-          switch (index) {
-            case 1:
-              context.push('/transactions');
-            case 2:
-              context.push('/reports');
-            case 3:
-              context.push('/budget');
-            case 4:
-              context.push('/settings');
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.swap_horiz), label: 'Movimientos'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.bar_chart), label: 'Reportes'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.pie_chart), label: 'Presupuesto'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.settings), label: 'Ajustes'),
-        ],
-      ),
     );
   }
 }

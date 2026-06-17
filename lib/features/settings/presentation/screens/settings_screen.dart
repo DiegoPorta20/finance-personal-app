@@ -38,10 +38,10 @@ class SettingsScreen extends ConsumerWidget {
                 onTap: () => context.push('/settings/profile'),
               ),
               _SettingsTile(
-                icon: Icons.dark_mode_outlined,
+                icon: isDark ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
                 title: 'Tema',
-                subtitle: 'Oscuro',
-                onTap: () {},
+                subtitle: isDark ? 'Oscuro' : 'Claro',
+                onTap: () => ref.read(themeModeProvider.notifier).toggle(),
               ),
             ],
           ),
