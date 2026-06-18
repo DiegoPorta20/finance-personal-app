@@ -10,7 +10,24 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _repository;
 
-  AuthNotifier(this._repository) : super(const AuthState());
+  AuthNotifier(this._repository) : super(const AuthState()) {
+    _loadSession();
+  }
+
+  /// Restaura la sesión desde el almacenamiento seguro al abrir la app.
+  /// Mantiene al usuario logueado hasta que cierre sesión explícitamente.
+  Future<void> _loadSession() async {
+    final token = await _repository.currentToken();
+    if (token != null && token.isNotEmpty) {
+      state = state.copyWith(
+        isAuthenticated: true,
+        token: token,
+        isInitialized: true,
+      );
+    } else {
+      state = state.copyWith(isInitialized: true);
+    }
+  }
 
   Future<void> login(String email, String password) async {
     state = state.copyWith(isLoading: true, error: null);
@@ -52,7 +69,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> logout() async {
     await _repository.logout();
-    state = const AuthState();
+    state = const AuthState(isInitialized: true);
   }
 
   String _extractError(DioException e) {

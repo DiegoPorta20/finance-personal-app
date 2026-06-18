@@ -1,17 +1,22 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../domain/report_model.dart';
+import '../domain/report_period.dart';
 import '../data/analytics_repository.dart';
+
+/// Periodo seleccionado en Reportes (Diario/Semanal/Mensual/Anual).
+/// Por defecto, Mensual.
+final reportPeriodProvider =
+    StateProvider<ReportPeriod>((ref) => ReportPeriod.monthly);
 
 final categorySpendingProvider =
     FutureProvider<List<CategorySpending>>((ref) async {
   final repo = ref.read(analyticsRepositoryProvider);
-  final now = DateTime.now();
-  final start = DateTime(now.year, now.month, 1);
-  final end = DateTime(now.year, now.month + 1, 0);
+  final period = ref.watch(reportPeriodProvider);
+  final range = period.range(DateTime.now());
 
   final data = await repo.spendingByCategory(
-    start.toIso8601String(),
-    end.toIso8601String(),
+    range.start.toIso8601String(),
+    range.end.toIso8601String(),
   );
 
   final totalSpent = data.fold<int>(
@@ -33,7 +38,8 @@ final categorySpendingProvider =
 final monthlyComparisonProvider =
     FutureProvider<List<MonthlyComparison>>((ref) async {
   final repo = ref.read(analyticsRepositoryProvider);
-  final data = await repo.incomeVsExpense(months: 6);
+  final period = ref.watch(reportPeriodProvider);
+  final data = await repo.incomeVsExpense(months: period.trendMonths);
 
   return data.map((d) {
     final month = d['month'] as int? ?? 1;
@@ -48,7 +54,8 @@ final monthlyComparisonProvider =
 final savingsTrendProvider =
     FutureProvider<List<SavingsTrend>>((ref) async {
   final repo = ref.read(analyticsRepositoryProvider);
-  final data = await repo.savingsTrend(months: 6);
+  final period = ref.watch(reportPeriodProvider);
+  final data = await repo.savingsTrend(months: period.trendMonths);
 
   return data.map((d) {
     final month = d['month'] as int? ?? 1;

@@ -5,6 +5,8 @@ import '../../../../core/theme/app_theme.dart';
 import '../widgets/spending_pie_chart.dart';
 import '../widgets/income_expense_bar_chart.dart';
 import '../widgets/savings_line_chart.dart';
+import '../widgets/period_selector.dart';
+import '../../application/reports_provider.dart';
 
 class ReportsScreen extends ConsumerWidget {
   const ReportsScreen({super.key});
@@ -27,11 +29,22 @@ class ReportsScreen extends ConsumerWidget {
             ],
           ),
         ),
-        body: const TabBarView(
+        body: Column(
           children: [
-            SpendingPieChart(),
-            IncomeExpenseBarChart(),
-            SavingsLineChart(),
+            PeriodSelector(
+              selected: ref.watch(reportPeriodProvider),
+              onChanged: (p) =>
+                  ref.read(reportPeriodProvider.notifier).state = p,
+            ),
+            Expanded(
+              child: TabBarView(
+                children: const [
+                  SpendingPieChart(),
+                  IncomeExpenseBarChart(),
+                  SavingsLineChart(),
+                ],
+              ),
+            ),
           ],
         ),
       ),

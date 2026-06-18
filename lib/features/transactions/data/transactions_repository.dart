@@ -22,7 +22,10 @@ class TransactionsRepository {
 
     final response =
         await _client.dio.get('/transactions', queryParameters: queryParams);
-    return (response.data as List).cast<Map<String, dynamic>>();
+    // El endpoint devuelve { data: [...], meta: {...} } (paginado).
+    final raw = response.data;
+    final list = (raw is Map ? raw['data'] as List : raw as List);
+    return list.cast<Map<String, dynamic>>();
   }
 
   Future<Map<String, dynamic>> create(Map<String, dynamic> data) async {

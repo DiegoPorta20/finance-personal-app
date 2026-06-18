@@ -4,9 +4,10 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/utils/time_period.dart';
+import '../../../../core/widgets/period_selector.dart';
 import '../../application/transactions_provider.dart';
 import '../../domain/transaction_model.dart';
-import '../widgets/create_transaction_sheet.dart';
 
 class TransactionsScreen extends ConsumerWidget {
   const TransactionsScreen({super.key});
@@ -29,33 +30,28 @@ class TransactionsScreen extends ConsumerWidget {
             ],
           ),
         ),
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: AppColors.accent,
-          onPressed: () => _showCreateSheet(context, ref),
-          child: const Icon(Icons.add, color: Colors.black),
-        ),
-        body: const TabBarView(
+        body: Column(
           children: [
-            _TransactionList(filter: null),
-            _TransactionList(filter: 'expense'),
-            _TransactionList(filter: 'income'),
+            PeriodSelector(
+              selected: ref.watch(transactionsPeriodProvider),
+              onChanged: (p) =>
+                  ref.read(transactionsPeriodProvider.notifier).state = p,
+            ),
+            const Expanded(
+              child: TabBarView(
+                children: [
+                  _TransactionList(filter: null),
+                  _TransactionList(filter: 'expense'),
+                  _TransactionList(filter: 'income'),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  void _showCreateSheet(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.card,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => const CreateTransactionSheet(),
-    );
-  }
 }
 
 class _TransactionList extends ConsumerWidget {
@@ -66,6 +62,7 @@ class _TransactionList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final txAsync = ref.watch(transactionsProvider);
+    final range = ref.watch(transactionsPeriodProvider).range(DateTime.now());
 
     return txAsync.when(
       loading: () => const Center(
@@ -87,9 +84,12 @@ class _TransactionList extends ConsumerWidget {
         ),
       ),
       data: (transactions) {
-        final filtered = filter == null
-            ? transactions
-            : transactions.where((tx) => tx.type == filter).toList();
+        final filtered = transactions.where((tx) {
+          final matchesType = filter == null || tx.type == filter;
+          final inRange = !tx.date.isBefore(range.start) &&
+              !tx.date.isAfter(range.end);
+          return matchesType && inRange;
+        }).toList();
 
         if (filtered.isEmpty) {
           return Center(

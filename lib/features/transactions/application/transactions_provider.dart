@@ -1,6 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/utils/time_period.dart';
 import '../domain/transaction_model.dart';
 import '../data/transactions_repository.dart';
+
+/// Periodo seleccionado en Movimientos (Diario/Semanal/Mensual/Anual).
+final transactionsPeriodProvider =
+    StateProvider<TimePeriod>((ref) => TimePeriod.monthly);
 
 final transactionsProvider =
     AsyncNotifierProvider<TransactionsNotifier, List<Transaction>>(

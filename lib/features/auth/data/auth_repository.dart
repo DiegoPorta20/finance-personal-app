@@ -39,4 +39,7 @@ class AuthRepository {
   Future<void> logout() async {
     await _client.deleteToken();
   }
+
+  /// Token guardado (si existe) para restaurar la sesión al abrir la app.
+  Future<String?> currentToken() => _client.getToken();
 }

@@ -3,6 +3,7 @@ class AuthState {
   final String? token;
   final String? userId;
   final bool isLoading;
+  final bool isInitialized;
   final String? error;
 
   const AuthState({
@@ -10,6 +11,7 @@ class AuthState {
     this.token,
     this.userId,
     this.isLoading = false,
+    this.isInitialized = false,
     this.error,
   });
 
@@ -18,6 +20,7 @@ class AuthState {
     String? token,
     String? userId,
     bool? isLoading,
+    bool? isInitialized,
     String? error,
   }) {
     return AuthState(
@@ -25,6 +28,7 @@ class AuthState {
       token: token ?? this.token,
       userId: userId ?? this.userId,
       isLoading: isLoading ?? this.isLoading,
+      isInitialized: isInitialized ?? this.isInitialized,
       error: error,
     );
   }

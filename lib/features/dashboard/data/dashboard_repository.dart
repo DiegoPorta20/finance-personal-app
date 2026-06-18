@@ -29,7 +29,9 @@ class DashboardRepository {
 
   Future<List<RecentTransaction>> getRecentTransactions() async {
     final response = await _client.dio.get('/transactions');
-    final list = response.data as List;
+    // El endpoint devuelve { data: [...], meta: {...} } (paginado).
+    final raw = response.data;
+    final list = (raw is Map ? raw['data'] as List : raw as List);
     return list.take(5).map((json) {
       final j = json as Map<String, dynamic>;
       final category = j['category'] as Map<String, dynamic>?;

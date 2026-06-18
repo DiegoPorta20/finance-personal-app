@@ -1,6 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/utils/time_period.dart';
 import '../domain/dashboard_model.dart';
 import '../data/dashboard_repository.dart';
+
+/// Periodo seleccionado en el Dashboard (Diario/Semanal/Mensual/Anual).
+final dashboardPeriodProvider =
+    StateProvider<TimePeriod>((ref) => TimePeriod.monthly);
 
 final dashboardProvider =
     AsyncNotifierProvider<DashboardNotifier, DashboardData>(
@@ -10,6 +15,8 @@ final dashboardProvider =
 class DashboardNotifier extends AsyncNotifier<DashboardData> {
   @override
   Future<DashboardData> build() async {
+    // Refetch cuando cambia el periodo seleccionado.
+    ref.watch(dashboardPeriodProvider);
     return _fetchData();
   }
 
@@ -31,23 +38,23 @@ class DashboardNotifier extends AsyncNotifier<DashboardData> {
     final totalBalance =
         accounts.fold<int>(0, (sum, a) => sum + a.balance);
 
-    // Calculate monthly savings from transactions
-    final now = DateTime.now();
-    final monthStart = DateTime(now.year, now.month, 1);
-    final monthTransactions = transactions
-        .where((t) => t.date.isAfter(monthStart))
+    // Ingresos/egresos del periodo seleccionado.
+    final range = ref.read(dashboardPeriodProvider).range(DateTime.now());
+    final periodTransactions = transactions
+        .where((t) =>
+            !t.date.isBefore(range.start) && !t.date.isAfter(range.end))
         .toList();
-    final monthIncome = monthTransactions
+    final income = periodTransactions
         .where((t) => t.type == 'income')
         .fold<int>(0, (sum, t) => sum + t.amount);
-    final monthExpense = monthTransactions
+    final expense = periodTransactions
         .where((t) => t.type == 'expense')
         .fold<int>(0, (sum, t) => sum + t.amount);
 
     return DashboardData(
       totalBalance: totalBalance,
-      monthlySavingsGoal: (monthIncome * 0.2).round(),
-      monthlySavingsCurrent: monthIncome - monthExpense,
+      monthlySavingsGoal: (income * 0.2).round(),
+      monthlySavingsCurrent: income - expense,
       accounts: accounts,
       recentTransactions: transactions,
     );

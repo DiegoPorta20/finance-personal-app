@@ -12,6 +12,7 @@ import '../../features/savings_goals/presentation/screens/savings_goals_screen.d
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/income_sources/presentation/screens/income_sources_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
+import '../../features/transactions/presentation/widgets/create_transaction_sheet.dart';
 import '../../features/auth/application/auth_provider.dart';
 import '../theme/app_theme.dart';
 
@@ -21,16 +22,30 @@ final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
 
   return GoRouter(
-    initialLocation: '/login',
+    initialLocation: '/splash',
     redirect: (context, state) {
-      final isLoggedIn = authState.isAuthenticated;
-      final isOnLogin = state.matchedLocation == '/login';
+      final loc = state.matchedLocation;
 
-      if (!isLoggedIn && !isOnLogin) return '/login';
-      if (isLoggedIn && isOnLogin) return '/dashboard';
+      // Mientras se restaura la sesión desde el almacenamiento seguro.
+      if (!authState.isInitialized) {
+        return loc == '/splash' ? null : '/splash';
+      }
+
+      final isLoggedIn = authState.isAuthenticated;
+
+      if (!isLoggedIn) {
+        return loc == '/login' ? null : '/login';
+      }
+
+      // Autenticado: salir del splash/login hacia el dashboard.
+      if (loc == '/splash' || loc == '/login') return '/dashboard';
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/splash',
+        builder: (context, state) => const _SplashScreen(),
+      ),
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
@@ -85,6 +100,19 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+class _SplashScreen extends StatelessWidget {
+  const _SplashScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(color: AppColors.accent),
+      ),
+    );
+  }
+}
 
 class _ShellScaffold extends StatelessWidget {
   final GoRouterState state;
@@ -172,6 +200,20 @@ class _ShellScaffold extends StatelessWidget {
     );
   }
 
+  // El botón central (+) abre el formulario de nueva transacción
+  // desde cualquier pantalla.
+  void _showCreateTransaction(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.card,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => const CreateTransactionSheet(),
+    );
+  }
+
   Widget _navIcon(BuildContext context, int index) {
     final active = _currentIndex == index;
     return Expanded(
@@ -195,7 +237,7 @@ class _ShellScaffold extends StatelessWidget {
     return Scaffold(
       body: child,
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/transactions'),
+        onPressed: () => _showCreateTransaction(context),
         backgroundColor: AppColors.accent,
         foregroundColor: Colors.black,
         elevation: 2,

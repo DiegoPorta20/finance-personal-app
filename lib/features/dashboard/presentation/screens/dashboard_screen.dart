@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/widgets/period_selector.dart';
 import '../../application/dashboard_provider.dart';
 import '../../domain/dashboard_model.dart';
 import '../widgets/savings_ring.dart';
@@ -87,6 +88,14 @@ class _DashboardContent extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 24),
+
+          // Selector de periodo
+          PeriodSelector(
+            selected: ref.watch(dashboardPeriodProvider),
+            onChanged: (p) =>
+                ref.read(dashboardPeriodProvider.notifier).state = p,
+          ),
+          const SizedBox(height: 16),
 
           // Total balance
           Container(
