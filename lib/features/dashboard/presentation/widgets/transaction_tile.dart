@@ -72,10 +72,13 @@ class TransactionTile extends StatelessWidget {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: context.cCard,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => Padding(
+      builder: (ctx) => SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -109,7 +112,7 @@ class TransactionTile extends StatelessWidget {
             _detailRow(ctx, 'Fecha', dateFormat.format(transaction.date)),
           ],
         ),
-      ),
+      ))),
     );
   }
 
