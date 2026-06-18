@@ -17,7 +17,7 @@ class CategoriesScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Categorias')),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.accent,
-        onPressed: () => _showAddCategory(context, ref),
+        onPressed: () => _showCategorySheet(context),
         child: const Icon(Icons.add, color: Colors.black),
       ),
       body: categoriesAsync.when(
@@ -66,6 +66,10 @@ class CategoriesScreen extends ConsumerWidget {
                             Icon(_iconFor(c.icon), color: AppColors.accent),
                         title: Text(c.name,
                             style: Theme.of(context).textTheme.titleMedium),
+                        trailing: const Icon(Icons.chevron_right,
+                            color: AppColors.textSecondary),
+                        onTap: () =>
+                            _showCategorySheet(context, category: c),
                       ))
                   .toList(),
             ),
@@ -74,7 +78,7 @@ class CategoriesScreen extends ConsumerWidget {
     );
   }
 
-  void _showAddCategory(BuildContext context, WidgetRef ref) {
+  void _showCategorySheet(BuildContext context, {Category? category}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -82,7 +86,7 @@ class CategoriesScreen extends ConsumerWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => const _AddCategorySheet(),
+      builder: (_) => _CategorySheet(category: category),
     );
   }
 
@@ -105,16 +109,30 @@ class CategoriesScreen extends ConsumerWidget {
   }
 }
 
-class _AddCategorySheet extends ConsumerStatefulWidget {
-  const _AddCategorySheet();
+class _CategorySheet extends ConsumerStatefulWidget {
+  final Category? category;
+
+  const _CategorySheet({this.category});
 
   @override
-  ConsumerState<_AddCategorySheet> createState() => _AddCategorySheetState();
+  ConsumerState<_CategorySheet> createState() => _CategorySheetState();
 }
 
-class _AddCategorySheetState extends ConsumerState<_AddCategorySheet> {
+class _CategorySheetState extends ConsumerState<_CategorySheet> {
   final _nameController = TextEditingController();
   String _type = 'expense';
+
+  bool get _isEditing => widget.category != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final c = widget.category;
+    if (c != null) {
+      _nameController.text = c.name;
+      _type = c.type;
+    }
+  }
 
   @override
   void dispose() {
@@ -125,15 +143,40 @@ class _AddCategorySheetState extends ConsumerState<_AddCategorySheet> {
   Future<void> _submit() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) return;
-    final slug = name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '_');
-    await ref.read(categoriesRepositoryProvider).create({
-      'slug': slug,
-      'name': name,
-      'type': _type,
-      'icon': 'more_horiz',
-    });
+    final repo = ref.read(categoriesRepositoryProvider);
+    final navigator = Navigator.of(context);
+    final category = widget.category;
+    if (category == null) {
+      final slug = name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '_');
+      await repo.create({
+        'slug': slug,
+        'name': name,
+        'type': _type,
+        'icon': 'more_horiz',
+      });
+    } else {
+      await repo.update(category.id, {'name': name, 'type': _type});
+    }
     ref.invalidate(categoriesProvider);
-    if (mounted) Navigator.of(context).pop();
+    if (mounted) navigator.pop();
+  }
+
+  Future<void> _delete() async {
+    final category = widget.category;
+    if (category == null) return;
+    final repo = ref.read(categoriesRepositoryProvider);
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    try {
+      await repo.delete(category.id);
+      ref.invalidate(categoriesProvider);
+      if (mounted) navigator.pop();
+    } catch (_) {
+      if (mounted) {
+        messenger.showSnackBar(const SnackBar(
+            content: Text('No se puede eliminar: la categoria esta en uso')));
+      }
+    }
   }
 
   @override
@@ -160,7 +203,7 @@ class _AddCategorySheetState extends ConsumerState<_AddCategorySheet> {
             ),
           ),
           const SizedBox(height: 20),
-          Text('Nueva categoria',
+          Text(_isEditing ? 'Editar categoria' : 'Nueva categoria',
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 20),
           TextField(
@@ -180,8 +223,17 @@ class _AddCategorySheetState extends ConsumerState<_AddCategorySheet> {
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: _submit,
-            child: const Text('Crear categoria'),
+            child: Text(_isEditing ? 'Guardar cambios' : 'Crear categoria'),
           ),
+          if (_isEditing) ...[
+            const SizedBox(height: 8),
+            TextButton.icon(
+              onPressed: _delete,
+              icon: const Icon(Icons.delete_outline, color: AppColors.error),
+              label: const Text('Eliminar',
+                  style: TextStyle(color: AppColors.error)),
+            ),
+          ],
         ],
       ),
     );

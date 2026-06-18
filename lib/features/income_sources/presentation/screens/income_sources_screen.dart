@@ -295,7 +295,7 @@ class _IncomeSourceSheetState extends ConsumerState<_IncomeSourceSheet> {
                       return DropdownMenuItem(
                         value: a.id,
                         child: Text(a.name,
-                            style: const TextStyle(
+                            style: TextStyle(
                                 color: context.cTextPrimary)),
                       );
                     }).toList(),

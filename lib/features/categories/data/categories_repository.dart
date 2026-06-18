@@ -20,4 +20,14 @@ class CategoriesRepository {
     final response = await _client.dio.post('/categories', data: data);
     return response.data as Map<String, dynamic>;
   }
+
+  Future<Map<String, dynamic>> update(
+      String id, Map<String, dynamic> data) async {
+    final response = await _client.dio.patch('/categories/$id', data: data);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<void> delete(String id) async {
+    await _client.dio.delete('/categories/$id');
+  }
 }

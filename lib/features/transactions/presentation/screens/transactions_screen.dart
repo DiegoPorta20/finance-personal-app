@@ -136,13 +136,16 @@ class _TransactionItem extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: context.cCard,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
+      child: InkWell(
+        onTap: () => _showDetail(context),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: context.cCard,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
           children: [
             Container(
               width: 44,
@@ -183,6 +186,76 @@ class _TransactionItem extends StatelessWidget {
             ),
           ],
         ),
+      ),
+        ),
+    );
+  }
+
+  void _showDetail(BuildContext context) {
+    final isIncome = transaction.isIncome;
+    final dateFormat = DateFormat('dd MMM yyyy, HH:mm');
+    final color = isIncome ? AppColors.accent : AppColors.error;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: context.cCard,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.textSecondary,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: color.withValues(alpha: 0.15),
+              child: Icon(_mapIcon(transaction.categoryIcon ?? 'more_horiz'),
+                  color: color),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '${isIncome ? '+' : '-'}'
+              '${CurrencyFormatter.formatDefault(transaction.amount)}',
+              style: Theme.of(ctx).textTheme.headlineMedium?.copyWith(
+                  color: isIncome ? AppColors.accent : context.cTextPrimary),
+            ),
+            Text(isIncome ? 'Ingreso' : 'Gasto',
+                style: Theme.of(ctx).textTheme.bodyMedium),
+            const SizedBox(height: 20),
+            _detailRow(ctx, 'Categoria', transaction.categoryName ?? '-'),
+            _detailRow(ctx, 'Cuenta', transaction.accountName ?? '-'),
+            _detailRow(ctx, 'Fecha', dateFormat.format(transaction.date)),
+            if (transaction.note != null && transaction.note!.isNotEmpty)
+              _detailRow(ctx, 'Nota', transaction.note!),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _detailRow(BuildContext context, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: Theme.of(context).textTheme.bodyMedium),
+          const SizedBox(width: 16),
+          Flexible(
+            child: Text(value,
+                textAlign: TextAlign.end,
+                style: Theme.of(context).textTheme.titleMedium),
+          ),
+        ],
       ),
     );
   }

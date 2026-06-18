@@ -26,9 +26,13 @@ String _symbolFor(String code) {
 class CurrencyFormatter {
   CurrencyFormatter._();
 
-  static String format(int cents, {String symbol = '\$'}) {
+  /// Símbolo actual según la moneda configurada por el usuario.
+  /// Lo mantiene sincronizado [FinanceApp] desde [currencySymbolProvider].
+  static String symbol = '\$';
+
+  static String format(int cents, {String? symbol}) {
     final formatter = NumberFormat.currency(
-      symbol: symbol,
+      symbol: symbol ?? CurrencyFormatter.symbol,
       decimalDigits: 2,
     );
     return formatter.format(cents / 100);

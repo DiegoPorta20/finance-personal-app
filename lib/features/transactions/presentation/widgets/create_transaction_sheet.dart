@@ -6,6 +6,7 @@ import '../../../accounts/application/accounts_provider.dart';
 import '../../../accounts/domain/account_model.dart';
 import '../../../categories/application/categories_provider.dart';
 import '../../../categories/domain/category_model.dart';
+import '../../../dashboard/application/dashboard_provider.dart';
 import '../../application/transactions_provider.dart';
 
 class CreateTransactionSheet extends ConsumerStatefulWidget {
@@ -104,6 +105,7 @@ class _CreateTransactionSheetState
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
               autofocus: true,
+              onChanged: (_) => setState(() {}),
             ),
             const SizedBox(height: 12),
 
@@ -181,7 +183,11 @@ class _CreateTransactionSheetState
             const SizedBox(height: 24),
 
             ElevatedButton(
-              onPressed: _submit,
+              onPressed: _isValid ? _submit : null,
+              style: ElevatedButton.styleFrom(
+                disabledBackgroundColor: context.cDivider,
+                disabledForegroundColor: AppColors.textSecondary,
+              ),
               child: const Text('Registrar'),
             ),
           ],
@@ -200,33 +206,39 @@ class _CreateTransactionSheetState
     required ValueChanged<String?> onChanged,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
         color: context.cCard,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: context.cDivider),
       ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: value,
-          hint: Row(
-            children: [
-              Icon(icon, color: AppColors.textSecondary, size: 20),
-              const SizedBox(width: 12),
-              Text(hint,
-                  style: const TextStyle(color: AppColors.textSecondary)),
-            ],
+      child: Row(
+        children: [
+          Icon(icon, color: AppColors.accent, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: value,
+                isExpanded: true,
+                hint: Text(hint,
+                    style: const TextStyle(color: AppColors.textSecondary)),
+                dropdownColor: context.cCard,
+                borderRadius: BorderRadius.circular(12),
+                icon: const Icon(Icons.keyboard_arrow_down,
+                    color: AppColors.textSecondary),
+                items: items.map((item) {
+                  return DropdownMenuItem(
+                    value: getId(item),
+                    child: Text(getLabel(item),
+                        style: TextStyle(color: context.cTextPrimary)),
+                  );
+                }).toList(),
+                onChanged: onChanged,
+              ),
+            ),
           ),
-          dropdownColor: context.cCard,
-          isExpanded: true,
-          items: items.map((item) {
-            return DropdownMenuItem(
-              value: getId(item),
-              child: Text(getLabel(item),
-                  style: TextStyle(color: context.cTextPrimary)),
-            );
-          }).toList(),
-          onChanged: onChanged,
-        ),
+        ],
       ),
     );
   }
@@ -252,20 +264,21 @@ class _CreateTransactionSheetState
     if (picked != null) setState(() => _selectedDate = picked);
   }
 
-  void _submit() {
-    final amountText = _amountController.text.trim();
-    if (amountText.isEmpty ||
-        _selectedAccountId == null ||
-        _selectedCategoryId == null) {
-      return;
-    }
+  bool get _isValid {
+    final amount = double.tryParse(_amountController.text.trim());
+    return amount != null &&
+        amount > 0 &&
+        _selectedAccountId != null &&
+        _selectedCategoryId != null;
+  }
 
-    final amountDouble = double.tryParse(amountText);
-    if (amountDouble == null || amountDouble <= 0) {
-      return;
-    }
+  Future<void> _submit() async {
+    if (!_isValid) return;
+    final amountDouble = double.parse(_amountController.text.trim());
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
 
-    ref.read(transactionsProvider.notifier).addTransaction(
+    await ref.read(transactionsProvider.notifier).addTransaction(
           type: _type,
           amount: (amountDouble * 100).round(),
           date: _selectedDate.toIso8601String(),
@@ -275,7 +288,14 @@ class _CreateTransactionSheetState
               ? _noteController.text.trim()
               : null,
         );
-    Navigator.of(context).pop();
+    if (!mounted) return;
+    // Refrescar dashboard y cuentas (el balance cambia).
+    ref.invalidate(dashboardProvider);
+    ref.invalidate(accountsProvider);
+    navigator.pop();
+    messenger.showSnackBar(
+      const SnackBar(content: Text('Transaccion registrada')),
+    );
   }
 }
 
