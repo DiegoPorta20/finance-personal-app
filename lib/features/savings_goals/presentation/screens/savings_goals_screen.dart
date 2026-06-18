@@ -7,6 +7,9 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../application/savings_goals_provider.dart';
 import '../../domain/savings_goal_model.dart';
+import '../../../accounts/application/accounts_provider.dart';
+import '../../../accounts/domain/account_model.dart';
+import '../../../dashboard/application/dashboard_provider.dart';
 
 class SavingsGoalsScreen extends ConsumerWidget {
   const SavingsGoalsScreen({super.key});
@@ -55,12 +58,7 @@ class SavingsGoalsScreen extends ConsumerWidget {
                 final goal = goals[index];
                 return GestureDetector(
                   onTap: () => _showGoalSheet(context, ref, goal: goal),
-                  child: _GoalCard(
-                    goal: goal,
-                    onAddFunds: (id, amount) => ref
-                        .read(savingsGoalsProvider.notifier)
-                        .addFunds(id, amount),
-                  ),
+                  child: _GoalCard(goal: goal),
                 );
               },
             ),
@@ -84,15 +82,13 @@ class SavingsGoalsScreen extends ConsumerWidget {
   }
 }
 
-class _GoalCard extends StatelessWidget {
+class _GoalCard extends ConsumerWidget {
   final SavingsGoal goal;
-  final void Function(String id, int amount)? _onAddFunds;
 
-  const _GoalCard({required this.goal, void Function(String, int)? onAddFunds})
-      : _onAddFunds = onAddFunds;
+  const _GoalCard({required this.goal});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final progressPercent = (goal.progress * 100).toInt();
     final dateFormat = DateFormat('dd MMM yyyy');
 
@@ -191,7 +187,7 @@ class _GoalCard extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
-                  onPressed: () => _showAddFundsDialog(context, goal),
+                  onPressed: () => _showAddFundsDialog(context, ref, goal),
                   icon: const Icon(Icons.add, size: 18),
                   label: const Text('Abonar'),
                   style: OutlinedButton.styleFrom(
@@ -210,37 +206,74 @@ class _GoalCard extends StatelessWidget {
     );
   }
 
-  void _showAddFundsDialog(BuildContext context, SavingsGoal goal) {
+  void _showAddFundsDialog(
+      BuildContext context, WidgetRef ref, SavingsGoal goal) {
     final controller = TextEditingController();
+    final accounts = ref.read(accountsProvider).valueOrNull ?? <Account>[];
+    String? accountId = accounts.isNotEmpty ? accounts.first.id : null;
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: context.cCard,
-        title: const Text('Abonar a meta'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(hintText: 'Monto (ej: 100.00)'),
-          style: TextStyle(color: context.cTextPrimary),
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          autofocus: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) => AlertDialog(
+          backgroundColor: context.cCard,
+          title: const Text('Abonar a meta'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: controller,
+                decoration:
+                    const InputDecoration(hintText: 'Monto (ej: 100.00)'),
+                style: TextStyle(color: context.cTextPrimary),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                autofocus: true,
+              ),
+              const SizedBox(height: 12),
+              if (accounts.isEmpty)
+                Text('No tienes cuentas para descontar',
+                    style: TextStyle(color: context.cTextSecondary))
+              else
+                DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: accountId,
+                    isExpanded: true,
+                    dropdownColor: context.cCard,
+                    items: accounts
+                        .map((Account a) => DropdownMenuItem(
+                              value: a.id,
+                              child: Text('Desde ${a.name}',
+                                  style:
+                                      TextStyle(color: context.cTextPrimary)),
+                            ))
+                        .toList(),
+                    onChanged: (v) => setLocal(() => accountId = v),
+                  ),
+                ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text('Cancelar',
+                  style: TextStyle(color: context.cTextSecondary)),
+            ),
+            TextButton(
+              onPressed: () {
+                final amount = double.tryParse(controller.text.trim());
+                if (amount == null || amount <= 0) return;
+                ref
+                    .read(savingsGoalsProvider.notifier)
+                    .addFunds(goal.id, (amount * 100).round(), accountId);
+                ref.invalidate(dashboardProvider);
+                ref.invalidate(accountsProvider);
+                Navigator.of(ctx).pop();
+              },
+              child: const Text('Abonar',
+                  style: TextStyle(color: AppColors.accent)),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancelar',
-                style: TextStyle(color: AppColors.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () {
-              final amount = double.tryParse(controller.text.trim());
-              if (amount == null || amount <= 0) return;
-              _onAddFunds?.call(goal.id, (amount * 100).round());
-              Navigator.of(ctx).pop();
-            },
-            child: const Text('Abonar',
-                style: TextStyle(color: AppColors.accent)),
-          ),
-        ],
       ),
     );
   }

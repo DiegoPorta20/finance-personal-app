@@ -28,11 +28,12 @@ class SavingsGoalsRepository {
     return response.data as Map<String, dynamic>;
   }
 
-  Future<Map<String, dynamic>> addFunds(String id, int amount) async {
-    final response = await _client.dio.patch(
-      '/savings-goals/$id/add-funds',
-      data: {'amount': amount},
-    );
+  Future<Map<String, dynamic>> addFunds(
+      String id, int amount, String? accountId) async {
+    final data = <String, dynamic>{'amount': amount};
+    if (accountId != null) data['accountId'] = accountId;
+    final response =
+        await _client.dio.patch('/savings-goals/$id/add-funds', data: data);
     return response.data as Map<String, dynamic>;
   }
 

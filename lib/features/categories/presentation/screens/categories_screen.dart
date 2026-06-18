@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/confirm_dialog.dart';
 import '../../application/categories_provider.dart';
 import '../../data/categories_repository.dart';
 import '../../domain/category_model.dart';
@@ -164,9 +165,15 @@ class _CategorySheetState extends ConsumerState<_CategorySheet> {
   Future<void> _delete() async {
     final category = widget.category;
     if (category == null) return;
-    final repo = ref.read(categoriesRepositoryProvider);
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Eliminar categoria',
+      message: 'Se eliminara "${category.name}".',
+    );
+    if (!confirmed) return;
+    final repo = ref.read(categoriesRepositoryProvider);
     try {
       await repo.delete(category.id);
       ref.invalidate(categoriesProvider);

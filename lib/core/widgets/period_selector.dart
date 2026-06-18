@@ -43,7 +43,7 @@ class PeriodSelector extends StatelessWidget {
                   child: Text(
                     period.label,
                     style: TextStyle(
-                      color: active ? Colors.black : AppColors.textSecondary,
+                      color: active ? Colors.black : context.cTextSecondary,
                       fontWeight: active ? FontWeight.bold : FontWeight.w500,
                       fontSize: 13.5,
                     ),

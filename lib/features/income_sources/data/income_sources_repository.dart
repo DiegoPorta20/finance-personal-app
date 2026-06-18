@@ -22,6 +22,15 @@ class IncomeSourcesRepository {
     return response.data as Map<String, dynamic>;
   }
 
+  /// Genera los ingresos recurrentes vencidos (se llama al abrir la app).
+  Future<void> generateDue() async {
+    try {
+      await _client.dio.post('/income-sources/generate-due');
+    } catch (_) {
+      // No bloquear la carga si falla.
+    }
+  }
+
   Future<Map<String, dynamic>> update(
       String id, Map<String, dynamic> data) async {
     final response = await _client.dio.patch('/income-sources/$id', data: data);

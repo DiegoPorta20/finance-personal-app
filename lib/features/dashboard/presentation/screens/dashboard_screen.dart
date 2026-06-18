@@ -83,7 +83,7 @@ class _DashboardContent extends ConsumerWidget {
               ),
               IconButton(
                 onPressed: () => ref.read(authProvider.notifier).logout(),
-                icon: const Icon(Icons.logout, color: AppColors.textSecondary),
+                icon: Icon(Icons.logout, color: context.cTextSecondary),
               ),
             ],
           ),

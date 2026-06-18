@@ -138,13 +138,13 @@ class _SettingsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(icon, color: AppColors.textSecondary),
+      leading: Icon(icon, color: context.cTextSecondary),
       title: Text(title, style: TextStyle(color: context.cTextPrimary)),
       subtitle: subtitle != null
-          ? Text(subtitle!, style: const TextStyle(color: AppColors.textSecondary))
+          ? Text(subtitle!, style: TextStyle(color: context.cTextSecondary))
           : null,
       trailing:
-          const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+          Icon(Icons.chevron_right, color: context.cTextSecondary),
       onTap: onTap,
     );
   }

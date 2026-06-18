@@ -89,7 +89,7 @@ class IncomeExpenseBarChart extends ConsumerWidget {
                       show: true,
                       drawVerticalLine: false,
                       getDrawingHorizontalLine: (value) =>
-                          FlLine(color: AppColors.divider, strokeWidth: 1),
+                          FlLine(color: context.cDivider, strokeWidth: 1),
                     ),
                     barGroups: months.asMap().entries.map((entry) {
                       final i = entry.key;

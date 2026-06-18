@@ -13,6 +13,7 @@ final budgetProvider = FutureProvider<BudgetSummary>((ref) async {
     final slug = d['categorySlug'] as String? ?? '';
     final group = _essentialSlugs.contains(slug) ? 'essentials' : 'lifestyle';
     return BudgetCategory(
+      budgetId: d['budgetId'] as String? ?? '',
       categoryId: d['categoryId'] as String? ?? '',
       categoryName: d['categoryName'] as String? ?? '',
       categoryIcon: d['categoryIcon'] as String? ?? 'more_horiz',

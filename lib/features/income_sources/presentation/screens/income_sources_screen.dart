@@ -287,8 +287,8 @@ class _IncomeSourceSheetState extends ConsumerState<_IncomeSourceSheet> {
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     value: _accountId,
-                    hint: const Text('Cuenta destino',
-                        style: TextStyle(color: AppColors.textSecondary)),
+                    hint: Text('Cuenta destino',
+                        style: TextStyle(color: context.cTextSecondary)),
                     dropdownColor: context.cCard,
                     isExpanded: true,
                     items: accounts.map((Account a) {

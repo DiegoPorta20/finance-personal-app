@@ -145,7 +145,7 @@ class _NotificationTile extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(dateFormat.format(notification.createdAt),
                         style: TextStyle(
-                            color: AppColors.textSecondary, fontSize: 12)),
+                            color: context.cTextSecondary, fontSize: 12)),
                   ],
                 ),
               ),

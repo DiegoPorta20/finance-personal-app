@@ -27,4 +27,12 @@ class BudgetRepository {
   Future<void> create(Map<String, dynamic> data) async {
     await _client.dio.post('/budgets', data: data);
   }
+
+  Future<void> update(String id, int amount) async {
+    await _client.dio.patch('/budgets/$id', data: {'amount': amount});
+  }
+
+  Future<void> delete(String id) async {
+    await _client.dio.delete('/budgets/$id');
+  }
 }

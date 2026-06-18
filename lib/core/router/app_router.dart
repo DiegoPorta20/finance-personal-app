@@ -14,6 +14,7 @@ import '../../features/settings/presentation/screens/profile_screen.dart';
 import '../../features/categories/presentation/screens/categories_screen.dart';
 import '../../features/income_sources/presentation/screens/income_sources_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
+import '../../features/recommendations/presentation/screens/recommendations_screen.dart';
 import '../../features/transactions/presentation/widgets/create_transaction_sheet.dart';
 import '../../features/auth/application/auth_provider.dart';
 import '../theme/app_theme.dart';
@@ -107,6 +108,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/settings/categories',
         builder: (context, state) => const CategoriesScreen(),
       ),
+      GoRoute(
+        path: '/recommendations',
+        builder: (context, state) => const RecommendationsScreen(),
+      ),
     ],
   );
 });
@@ -168,6 +173,7 @@ class _ShellScaffold extends StatelessWidget {
           ('/accounts', Icons.account_balance_wallet_rounded, 'Cuentas'),
           ('/savings-goals', Icons.savings_rounded, 'Metas de ahorro'),
           ('/income-sources', Icons.payments_rounded, 'Fuentes de ingreso'),
+          ('/recommendations', Icons.lightbulb_outline, 'Recomendaciones'),
           ('/notifications', Icons.notifications_rounded, 'Notificaciones'),
         ];
         return SafeArea(
@@ -181,7 +187,7 @@ class _ShellScaffold extends StatelessWidget {
                   height: 4,
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
-                    color: AppColors.divider,
+                    color: context.cDivider,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),

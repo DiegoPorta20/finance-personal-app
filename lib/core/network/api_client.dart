@@ -7,6 +7,10 @@ class ApiClient {
   late final Dio dio;
   final FlutterSecureStorage _storage;
 
+  /// Se invoca cuando una request (no-auth) devuelve 401 (sesión expirada).
+  /// Lo conecta FinanceApp para cerrar sesión sin crear dependencia circular.
+  void Function()? onUnauthorized;
+
   ApiClient({
     String? baseUrl,
     FlutterSecureStorage? storage,
@@ -30,8 +34,11 @@ class ApiClient {
           handler.next(options);
         },
         onError: (error, handler) {
-          if (error.response?.statusCode == 401) {
-            // TODO: Handle token refresh or logout
+          // 401 en cualquier endpoint que NO sea de auth = sesión expirada.
+          // (El 401 de /auth/login es "credenciales inválidas", no logout.)
+          if (error.response?.statusCode == 401 &&
+              !error.requestOptions.path.contains('/auth/')) {
+            onUnauthorized?.call();
           }
           handler.next(error);
         },

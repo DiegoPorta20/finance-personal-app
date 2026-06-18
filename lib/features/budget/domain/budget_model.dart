@@ -1,4 +1,5 @@
 class BudgetCategory {
+  final String budgetId;
   final String categoryId;
   final String categoryName;
   final String categoryIcon;
@@ -7,6 +8,7 @@ class BudgetCategory {
   final String group; // essentials, lifestyle, savings
 
   const BudgetCategory({
+    required this.budgetId,
     required this.categoryId,
     required this.categoryName,
     required this.categoryIcon,

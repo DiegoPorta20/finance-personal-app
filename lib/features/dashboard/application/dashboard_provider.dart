@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/time_period.dart';
 import '../domain/dashboard_model.dart';
 import '../data/dashboard_repository.dart';
+import '../../income_sources/data/income_sources_repository.dart';
 
 /// Periodo seleccionado en el Dashboard (Diario/Semanal/Mensual/Anual).
 final dashboardPeriodProvider =
@@ -27,6 +28,9 @@ class DashboardNotifier extends AsyncNotifier<DashboardData> {
 
   Future<DashboardData> _fetchData() async {
     final repo = ref.read(dashboardRepositoryProvider);
+
+    // Generar ingresos recurrentes vencidos antes de cargar los datos.
+    await ref.read(incomeSourcesRepositoryProvider).generateDue();
 
     final results = await Future.wait([
       repo.getAccounts(),

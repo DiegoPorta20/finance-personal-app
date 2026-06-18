@@ -90,7 +90,7 @@ class SavingsLineChart extends ConsumerWidget {
                       show: true,
                       drawVerticalLine: false,
                       getDrawingHorizontalLine: (value) =>
-                          FlLine(color: AppColors.divider, strokeWidth: 1),
+                          FlLine(color: context.cDivider, strokeWidth: 1),
                     ),
                     lineBarsData: [
                       LineChartBarData(

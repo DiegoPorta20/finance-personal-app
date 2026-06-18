@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/widgets/confirm_dialog.dart';
+import '../../../../core/widgets/list_skeleton.dart';
 import '../../application/accounts_provider.dart';
 import '../../domain/account_model.dart';
+import '../../../dashboard/application/dashboard_provider.dart';
 
 class AccountsScreen extends ConsumerWidget {
   const AccountsScreen({super.key});
@@ -23,9 +26,7 @@ class AccountsScreen extends ConsumerWidget {
         child: const Icon(Icons.add, color: Colors.black),
       ),
       body: accountsAsync.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: AppColors.accent),
-        ),
+        loading: () => const ListSkeleton(),
         error: (error, _) => Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -57,6 +58,16 @@ class AccountsScreen extends ConsumerWidget {
                   const SizedBox(height: 8),
                   Text('Agrega tu primera cuenta',
                       style: Theme.of(context).textTheme.bodyMedium),
+                  const SizedBox(height: 20),
+                  ElevatedButton.icon(
+                    onPressed: () => _showAccountSheet(context, ref),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Crear cuenta'),
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(0, 48),
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                    ),
+                  ),
                 ],
               ),
             );
@@ -288,8 +299,38 @@ class _AccountSheetState extends State<_AccountSheet> {
             },
             child: Text(_isEditing ? 'Guardar cambios' : 'Crear cuenta'),
           ),
+          if (_isEditing) ...[
+            const SizedBox(height: 8),
+            TextButton.icon(
+              onPressed: () => _delete(context),
+              icon: const Icon(Icons.delete_outline, color: AppColors.error),
+              label: const Text('Eliminar cuenta',
+                  style: TextStyle(color: AppColors.error)),
+            ),
+          ],
         ],
       ),
+    );
+  }
+
+  Future<void> _delete(BuildContext context) async {
+    final account = widget.account;
+    if (account == null) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Eliminar cuenta',
+      message:
+          'Se eliminara "${account.name}" y TODAS sus transacciones. '
+          'Esta accion no se puede deshacer.',
+    );
+    if (!confirmed) return;
+    await widget.ref.read(accountsProvider.notifier).deleteAccount(account.id);
+    widget.ref.invalidate(dashboardProvider);
+    navigator.pop();
+    messenger.showSnackBar(
+      const SnackBar(content: Text('Cuenta eliminada')),
     );
   }
 }
