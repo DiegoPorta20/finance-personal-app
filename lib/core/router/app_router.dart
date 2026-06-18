@@ -92,38 +92,132 @@ class _ShellScaffold extends StatelessWidget {
 
   const _ShellScaffold({required this.state, required this.child});
 
-  static const _tabs = [
-    ('/dashboard', Icons.home, 'Inicio'),
-    ('/transactions', Icons.swap_horiz, 'Movimientos'),
-    ('/reports', Icons.bar_chart, 'Reportes'),
-    ('/budget', Icons.pie_chart, 'Presupuesto'),
-    ('/settings', Icons.settings, 'Ajustes'),
+  static const _slots = [
+    ('/dashboard', Icons.home_rounded),
+    ('/transactions', Icons.swap_horiz_rounded),
+    ('/reports', Icons.show_chart_rounded),
+    ('__more__', Icons.grid_view_rounded),
   ];
 
   int get _currentIndex {
     final location = state.matchedLocation;
-    for (int i = 0; i < _tabs.length; i++) {
-      if (location == _tabs[i].$1) return i;
+    if (location == '/dashboard') return 0;
+    if (location == '/transactions') return 1;
+    if (location == '/reports') return 2;
+    return 3;
+  }
+
+  void _onSlotTap(BuildContext context, int index) {
+    final route = _slots[index].$1;
+    if (route == '__more__') {
+      _showMoreMenu(context);
+    } else {
+      context.go(route);
     }
-    return 0;
+  }
+
+  void _showMoreMenu(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.card,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        const items = [
+          ('/budget', Icons.pie_chart_rounded, 'Presupuesto'),
+          ('/settings', Icons.settings_rounded, 'Ajustes'),
+          ('/accounts', Icons.account_balance_wallet_rounded, 'Cuentas'),
+          ('/savings-goals', Icons.savings_rounded, 'Metas de ahorro'),
+          ('/income-sources', Icons.payments_rounded, 'Fuentes de ingreso'),
+          ('/notifications', Icons.notifications_rounded, 'Notificaciones'),
+        ];
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.divider,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                for (final item in items)
+                  ListTile(
+                    leading: Icon(item.$2, color: AppColors.accent),
+                    title: Text(item.$3,
+                        style: const TextStyle(color: AppColors.textPrimary)),
+                    onTap: () {
+                      Navigator.of(sheetContext).pop();
+                      final route = item.$1;
+                      // Presupuesto/Ajustes viven en el shell (conservan la
+                      // barra); las demás son independientes (con back).
+                      if (route == '/budget' || route == '/settings') {
+                        context.go(route);
+                      } else {
+                        context.push(route);
+                      }
+                    },
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _navIcon(BuildContext context, int index) {
+    final active = _currentIndex == index;
+    return Expanded(
+      child: InkWell(
+        onTap: () => _onSlotTap(context, index),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Icon(
+            _slots[index].$2,
+            size: 26,
+            color: active ? AppColors.accent : AppColors.textSecondary,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: child,
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Theme.of(context).bottomNavigationBarTheme.backgroundColor
-            ?? AppColors.card,
-        selectedItemColor: AppColors.accent,
-        unselectedItemColor: Theme.of(context).bottomNavigationBarTheme.unselectedItemColor
-            ?? AppColors.textSecondary,
-        currentIndex: _currentIndex,
-        onTap: (index) => GoRouter.of(context).go(_tabs[index].$1),
-        items: _tabs
-            .map((t) => BottomNavigationBarItem(icon: Icon(t.$2), label: t.$3))
-            .toList(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.go('/transactions'),
+        backgroundColor: AppColors.accent,
+        foregroundColor: Colors.black,
+        elevation: 2,
+        shape: const CircleBorder(),
+        child: const Icon(Icons.add, size: 30),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        color: AppColors.card,
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8,
+        height: 64,
+        padding: EdgeInsets.zero,
+        child: Row(
+          children: [
+            _navIcon(context, 0),
+            _navIcon(context, 1),
+            const SizedBox(width: 56), // hueco para el FAB
+            _navIcon(context, 2),
+            _navIcon(context, 3),
+          ],
+        ),
       ),
     );
   }
