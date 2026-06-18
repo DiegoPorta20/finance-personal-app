@@ -14,7 +14,7 @@ class ReportsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Reportes'),
@@ -22,8 +22,11 @@ class ReportsScreen extends ConsumerWidget {
             indicatorColor: AppColors.accent,
             labelColor: AppColors.accent,
             unselectedLabelColor: AppColors.textSecondary,
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
             tabs: const [
-              Tab(text: 'Categorias'),
+              Tab(text: 'Gastos'),
+              Tab(text: 'Ingresos'),
               Tab(text: 'Ing vs Eg'),
               Tab(text: 'Ahorro'),
             ],
@@ -38,10 +41,11 @@ class ReportsScreen extends ConsumerWidget {
             ),
             Expanded(
               child: TabBarView(
-                children: const [
-                  SpendingPieChart(),
-                  IncomeExpenseBarChart(),
-                  SavingsLineChart(),
+                children: [
+                  SpendingPieChart(provider: categorySpendingProvider),
+                  SpendingPieChart(provider: incomeCategoryProvider),
+                  const IncomeExpenseBarChart(),
+                  const SavingsLineChart(),
                 ],
               ),
             ),

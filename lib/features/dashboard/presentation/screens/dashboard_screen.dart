@@ -102,7 +102,7 @@ class _DashboardContent extends ConsumerWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppColors.card,
+              color: context.cCard,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Column(
@@ -147,7 +147,7 @@ class _DashboardContent extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           SizedBox(
-            height: 130,
+            height: 150,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: data.accounts.length,

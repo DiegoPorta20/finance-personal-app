@@ -19,7 +19,7 @@ class AccountsScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.accent,
-        onPressed: () => _showCreateDialog(context, ref),
+        onPressed: () => _showAccountSheet(context, ref),
         child: const Icon(Icons.add, color: Colors.black),
       ),
       body: accountsAsync.when(
@@ -68,8 +68,14 @@ class AccountsScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(20),
               itemCount: accounts.length,
               separatorBuilder: (_, _) => const SizedBox(height: 12),
-              itemBuilder: (context, index) =>
-                  _AccountTile(account: accounts[index]),
+              itemBuilder: (context, index) {
+                final account = accounts[index];
+                return GestureDetector(
+                  onTap: () =>
+                      _showAccountSheet(context, ref, account: account),
+                  child: _AccountTile(account: account),
+                );
+              },
             ),
           );
         },
@@ -77,15 +83,16 @@ class AccountsScreen extends ConsumerWidget {
     );
   }
 
-  void _showCreateDialog(BuildContext context, WidgetRef ref) {
+  void _showAccountSheet(BuildContext context, WidgetRef ref,
+      {Account? account}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.card,
+      backgroundColor: context.cCard,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => _CreateAccountSheet(ref: ref),
+      builder: (context) => _AccountSheet(ref: ref, account: account),
     );
   }
 }
@@ -107,7 +114,7 @@ class _AccountTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.cCard,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -116,10 +123,10 @@ class _AccountTile extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: AppColors.background,
+              color: context.cBg,
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(_icon, color: AppColors.textPrimary, size: 24),
+            child: Icon(_icon, color: context.cTextPrimary, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -147,18 +154,31 @@ class _AccountTile extends StatelessWidget {
   }
 }
 
-class _CreateAccountSheet extends StatefulWidget {
+class _AccountSheet extends StatefulWidget {
   final WidgetRef ref;
+  final Account? account;
 
-  const _CreateAccountSheet({required this.ref});
+  const _AccountSheet({required this.ref, this.account});
 
   @override
-  State<_CreateAccountSheet> createState() => _CreateAccountSheetState();
+  State<_AccountSheet> createState() => _AccountSheetState();
 }
 
-class _CreateAccountSheetState extends State<_CreateAccountSheet> {
+class _AccountSheetState extends State<_AccountSheet> {
   final _nameController = TextEditingController();
   String _selectedType = 'bank';
+
+  bool get _isEditing => widget.account != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final account = widget.account;
+    if (account != null) {
+      _nameController.text = account.name;
+      _selectedType = account.type;
+    }
+  }
 
   static const _accountTypes = [
     ('bank', 'Banco', Icons.account_balance),
@@ -196,13 +216,13 @@ class _CreateAccountSheetState extends State<_CreateAccountSheet> {
             ),
           ),
           const SizedBox(height: 20),
-          Text('Nueva cuenta',
+          Text(_isEditing ? 'Editar cuenta' : 'Nueva cuenta',
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 20),
           TextField(
             controller: _nameController,
             decoration: const InputDecoration(hintText: 'Nombre de la cuenta'),
-            style: const TextStyle(color: AppColors.textPrimary),
+            style: TextStyle(color: context.cTextPrimary),
             autofocus: true,
           ),
           const SizedBox(height: 16),
@@ -222,7 +242,7 @@ class _CreateAccountSheetState extends State<_CreateAccountSheet> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? AppColors.accent.withValues(alpha: 0.15)
-                          : AppColors.background,
+                          : context.cBg,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isSelected
@@ -257,12 +277,16 @@ class _CreateAccountSheetState extends State<_CreateAccountSheet> {
             onPressed: () {
               final name = _nameController.text.trim();
               if (name.isEmpty) return;
-              widget.ref
-                  .read(accountsProvider.notifier)
-                  .addAccount(name, _selectedType, 'USD');
+              final notifier = widget.ref.read(accountsProvider.notifier);
+              final account = widget.account;
+              if (account == null) {
+                notifier.addAccount(name, _selectedType, 'USD');
+              } else {
+                notifier.updateAccount(account.id, name, _selectedType);
+              }
               Navigator.of(context).pop();
             },
-            child: const Text('Crear cuenta'),
+            child: Text(_isEditing ? 'Guardar cambios' : 'Crear cuenta'),
           ),
         ],
       ),

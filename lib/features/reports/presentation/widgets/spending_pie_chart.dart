@@ -4,10 +4,12 @@ import 'package:fl_chart/fl_chart.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/currency_formatter.dart';
-import '../../application/reports_provider.dart';
+import '../../domain/report_model.dart';
 
 class SpendingPieChart extends ConsumerWidget {
-  const SpendingPieChart({super.key});
+  final FutureProvider<List<CategorySpending>> provider;
+
+  const SpendingPieChart({super.key, required this.provider});
 
   static const _colors = [
     AppColors.accent,
@@ -20,7 +22,7 @@ class SpendingPieChart extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dataAsync = ref.watch(categorySpendingProvider);
+    final dataAsync = ref.watch(provider);
 
     return dataAsync.when(
       loading: () => const Center(
@@ -30,16 +32,21 @@ class SpendingPieChart extends ConsumerWidget {
         if (categories.isEmpty) {
           return const Center(child: Text('Sin datos'));
         }
+        final total =
+            categories.fold<int>(0, (s, c) => s + c.totalAmount);
         return Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
               SizedBox(
                 height: 220,
-                child: PieChart(
-                  PieChartData(
-                    sectionsSpace: 2,
-                    centerSpaceRadius: 50,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    PieChart(
+                      PieChartData(
+                        sectionsSpace: 2,
+                        centerSpaceRadius: 50,
                     sections: categories.asMap().entries.map((entry) {
                       final i = entry.key;
                       final cat = entry.value;
@@ -54,8 +61,24 @@ class SpendingPieChart extends ConsumerWidget {
                           color: Colors.white,
                         ),
                       );
-                    }).toList(),
-                  ),
+                        }).toList(),
+                      ),
+                    ),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('Total',
+                            style: Theme.of(context).textTheme.bodyMedium),
+                        Text(
+                          CurrencyFormatter.formatDefault(total),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(color: AppColors.accent),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 24),

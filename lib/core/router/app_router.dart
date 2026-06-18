@@ -10,6 +10,8 @@ import '../../features/reports/presentation/screens/reports_screen.dart';
 import '../../features/budget/presentation/screens/budget_screen.dart';
 import '../../features/savings_goals/presentation/screens/savings_goals_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
+import '../../features/settings/presentation/screens/profile_screen.dart';
+import '../../features/categories/presentation/screens/categories_screen.dart';
 import '../../features/income_sources/presentation/screens/income_sources_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/transactions/presentation/widgets/create_transaction_sheet.dart';
@@ -97,6 +99,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/notifications',
         builder: (context, state) => const NotificationsScreen(),
       ),
+      GoRoute(
+        path: '/settings/profile',
+        builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: '/settings/categories',
+        builder: (context, state) => const CategoriesScreen(),
+      ),
     ],
   );
 });
@@ -147,7 +157,7 @@ class _ShellScaffold extends StatelessWidget {
   void _showMoreMenu(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: AppColors.card,
+      backgroundColor: context.cCard,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -179,7 +189,7 @@ class _ShellScaffold extends StatelessWidget {
                   ListTile(
                     leading: Icon(item.$2, color: AppColors.accent),
                     title: Text(item.$3,
-                        style: const TextStyle(color: AppColors.textPrimary)),
+                        style: TextStyle(color: context.cTextPrimary)),
                     onTap: () {
                       Navigator.of(sheetContext).pop();
                       final route = item.$1;
@@ -206,7 +216,7 @@ class _ShellScaffold extends StatelessWidget {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.card,
+      backgroundColor: context.cCard,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -246,7 +256,7 @@ class _ShellScaffold extends StatelessWidget {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
-        color: AppColors.card,
+        color: context.cCard,
         shape: const CircularNotchedRectangle(),
         notchMargin: 8,
         height: 64,

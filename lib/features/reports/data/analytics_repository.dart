@@ -22,6 +22,17 @@ class AnalyticsRepository {
     return (response.data as List).cast<Map<String, dynamic>>();
   }
 
+  Future<List<Map<String, dynamic>>> incomeByCategory(
+    String startDate,
+    String endDate,
+  ) async {
+    final response = await _client.dio.get(
+      '/analytics/income-by-category',
+      queryParameters: {'startDate': startDate, 'endDate': endDate},
+    );
+    return (response.data as List).cast<Map<String, dynamic>>();
+  }
+
   Future<List<Map<String, dynamic>>> incomeVsExpense({int months = 6}) async {
     final response = await _client.dio.get(
       '/analytics/income-vs-expense',

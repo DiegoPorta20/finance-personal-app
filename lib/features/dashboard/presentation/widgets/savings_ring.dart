@@ -68,7 +68,7 @@ class _SavingsRingState extends State<SavingsRing>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color ?? AppColors.card,
+        color: Theme.of(context).cardTheme.color ?? context.cCard,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(

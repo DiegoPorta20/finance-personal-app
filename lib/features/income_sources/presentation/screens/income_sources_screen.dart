@@ -6,6 +6,7 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../accounts/application/accounts_provider.dart';
 import '../../../accounts/domain/account_model.dart';
 import '../../application/income_sources_provider.dart';
+import '../../domain/income_source_model.dart';
 
 class IncomeSourcesScreen extends ConsumerWidget {
   const IncomeSourcesScreen({super.key});
@@ -18,7 +19,7 @@ class IncomeSourcesScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Ingresos Recurrentes')),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.accent,
-        onPressed: () => _showCreateSheet(context, ref),
+        onPressed: () => _showSourceSheet(context, ref),
         child: const Icon(Icons.add, color: Colors.black),
       ),
       body: sourcesAsync.when(
@@ -46,12 +47,14 @@ class IncomeSourcesScreen extends ConsumerWidget {
             itemCount: sources.length,
             itemBuilder: (context, index) {
               final source = sources[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Container(
+              return GestureDetector(
+                onTap: () => _showSourceSheet(context, ref, source: source),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.card,
+                    color: context.cCard,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Row(
@@ -91,7 +94,8 @@ class IncomeSourcesScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-              );
+              ),
+            );
             },
           );
         },
@@ -99,34 +103,51 @@ class IncomeSourcesScreen extends ConsumerWidget {
     );
   }
 
-  void _showCreateSheet(BuildContext context, WidgetRef ref) {
+  void _showSourceSheet(BuildContext context, WidgetRef ref,
+      {IncomeSource? source}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.card,
+      backgroundColor: context.cCard,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => const _CreateIncomeSourceSheet(),
+      builder: (context) => _IncomeSourceSheet(source: source),
     );
   }
 }
 
-class _CreateIncomeSourceSheet extends ConsumerStatefulWidget {
-  const _CreateIncomeSourceSheet();
+class _IncomeSourceSheet extends ConsumerStatefulWidget {
+  final IncomeSource? source;
+
+  const _IncomeSourceSheet({this.source});
 
   @override
-  ConsumerState<_CreateIncomeSourceSheet> createState() =>
-      _CreateIncomeSourceSheetState();
+  ConsumerState<_IncomeSourceSheet> createState() =>
+      _IncomeSourceSheetState();
 }
 
-class _CreateIncomeSourceSheetState
-    extends ConsumerState<_CreateIncomeSourceSheet> {
+class _IncomeSourceSheetState extends ConsumerState<_IncomeSourceSheet> {
   final _nameController = TextEditingController();
   final _amountController = TextEditingController();
   String _type = 'salary';
   String _periodicity = 'monthly';
   String? _accountId;
+
+  bool get _isEditing => widget.source != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final source = widget.source;
+    if (source != null) {
+      _nameController.text = source.name;
+      _amountController.text = (source.amount / 100).toStringAsFixed(2);
+      _type = source.type;
+      _periodicity = source.periodicity;
+      _accountId = source.accountId;
+    }
+  }
 
   static const _types = [
     ('salary', 'Sueldo fijo'),
@@ -167,20 +188,20 @@ class _CreateIncomeSourceSheetState
               ),
             ),
             const SizedBox(height: 20),
-            Text('Nuevo ingreso recurrente',
+            Text(_isEditing ? 'Editar ingreso' : 'Nuevo ingreso recurrente',
                 style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 20),
             TextField(
               controller: _nameController,
               decoration: const InputDecoration(hintText: 'Nombre'),
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: context.cTextPrimary),
               autofocus: true,
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _amountController,
               decoration: const InputDecoration(hintText: 'Monto (ej: 3000.00)'),
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: context.cTextPrimary),
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
             ),
@@ -189,20 +210,20 @@ class _CreateIncomeSourceSheetState
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: AppColors.card,
+                color: context.cCard,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   value: _type,
-                  dropdownColor: AppColors.card,
+                  dropdownColor: context.cCard,
                   isExpanded: true,
                   items: _types.map((t) {
                     return DropdownMenuItem(
                       value: t.$1,
                       child: Text(t.$2,
                           style:
-                              const TextStyle(color: AppColors.textPrimary)),
+                              TextStyle(color: context.cTextPrimary)),
                     );
                   }).toList(),
                   onChanged: (v) {
@@ -229,7 +250,7 @@ class _CreateIncomeSourceSheetState
                         decoration: BoxDecoration(
                           color: _periodicity == p.$1
                               ? AppColors.accent.withValues(alpha: 0.15)
-                              : AppColors.background,
+                              : context.cBg,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                             color: _periodicity == p.$1
@@ -260,7 +281,7 @@ class _CreateIncomeSourceSheetState
               data: (accounts) => Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  color: AppColors.card,
+                  color: context.cCard,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: DropdownButtonHideUnderline(
@@ -268,14 +289,14 @@ class _CreateIncomeSourceSheetState
                     value: _accountId,
                     hint: const Text('Cuenta destino',
                         style: TextStyle(color: AppColors.textSecondary)),
-                    dropdownColor: AppColors.card,
+                    dropdownColor: context.cCard,
                     isExpanded: true,
                     items: accounts.map((Account a) {
                       return DropdownMenuItem(
                         value: a.id,
                         child: Text(a.name,
                             style: const TextStyle(
-                                color: AppColors.textPrimary)),
+                                color: context.cTextPrimary)),
                       );
                     }).toList(),
                     onChanged: (v) => setState(() => _accountId = v),
@@ -286,7 +307,7 @@ class _CreateIncomeSourceSheetState
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: _submit,
-              child: const Text('Crear'),
+              child: Text(_isEditing ? 'Guardar cambios' : 'Crear'),
             ),
           ],
         ),
@@ -301,14 +322,20 @@ class _CreateIncomeSourceSheetState
     final amount = double.tryParse(amountText);
     if (amount == null || amount <= 0) return;
 
-    ref.read(incomeSourcesProvider.notifier).add({
+    final data = {
       'name': name,
       'type': _type,
       'amount': (amount * 100).round(),
       'periodicity': _periodicity,
-      'nextDate': DateTime.now().toIso8601String(),
       'accountId': _accountId,
-    });
+    };
+    final notifier = ref.read(incomeSourcesProvider.notifier);
+    final source = widget.source;
+    if (source == null) {
+      notifier.add({...data, 'nextDate': DateTime.now().toIso8601String()});
+    } else {
+      notifier.updateSource(source.id, data);
+    }
     Navigator.of(context).pop();
   }
 }

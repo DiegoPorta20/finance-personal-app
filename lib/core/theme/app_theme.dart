@@ -20,6 +20,21 @@ class AppColors {
   static const lightDivider = Color(0xFFE5E5EA);
 }
 
+/// Colores resueltos según el tema actual (claro/oscuro).
+/// Usar `context.cCard`, `context.cTextPrimary`, etc. en los widgets en vez de
+/// los colores fijos oscuros de [AppColors], para que el tema claro funcione.
+extension ThemeColors on BuildContext {
+  bool get _isDark => Theme.of(this).brightness == Brightness.dark;
+  Color get cBg =>
+      _isDark ? AppColors.background : AppColors.lightBackground;
+  Color get cCard => _isDark ? AppColors.card : AppColors.lightCard;
+  Color get cTextPrimary =>
+      _isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+  Color get cTextSecondary =>
+      _isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+  Color get cDivider => _isDark ? AppColors.divider : AppColors.lightDivider;
+}
+
 class AppTheme {
   AppTheme._();
 

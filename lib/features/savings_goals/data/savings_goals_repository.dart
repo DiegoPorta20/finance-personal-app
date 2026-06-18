@@ -22,6 +22,12 @@ class SavingsGoalsRepository {
     return response.data as Map<String, dynamic>;
   }
 
+  Future<Map<String, dynamic>> update(
+      String id, Map<String, dynamic> data) async {
+    final response = await _client.dio.patch('/savings-goals/$id', data: data);
+    return response.data as Map<String, dynamic>;
+  }
+
   Future<Map<String, dynamic>> addFunds(String id, int amount) async {
     final response = await _client.dio.patch(
       '/savings-goals/$id/add-funds',

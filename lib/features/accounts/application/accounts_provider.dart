@@ -21,6 +21,12 @@ class AccountsNotifier extends AsyncNotifier<List<Account>> {
     ref.invalidateSelf();
   }
 
+  Future<void> updateAccount(String id, String name, String type) async {
+    final repo = ref.read(accountsRepositoryProvider);
+    await repo.update(id, {'name': name, 'type': type});
+    ref.invalidateSelf();
+  }
+
   Future<void> deleteAccount(String id) async {
     final repo = ref.read(accountsRepositoryProvider);
     await repo.delete(id);

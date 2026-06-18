@@ -21,7 +21,7 @@ class AccountCard extends StatelessWidget {
       width: 160,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.cCard,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -31,10 +31,10 @@ class AccountCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppColors.background,
+              color: context.cBg,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(_icon, color: AppColors.textPrimary, size: 20),
+            child: Icon(_icon, color: context.cTextPrimary, size: 20),
           ),
           const SizedBox(height: 12),
           Text(

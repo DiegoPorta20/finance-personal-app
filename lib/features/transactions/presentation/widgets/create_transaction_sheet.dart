@@ -100,7 +100,7 @@ class _CreateTransactionSheetState
                 prefixIcon:
                     Icon(Icons.attach_money, color: AppColors.textSecondary),
               ),
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: context.cTextPrimary),
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
               autofocus: true,
@@ -149,7 +149,7 @@ class _CreateTransactionSheetState
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
-                  color: AppColors.card,
+                  color: context.cCard,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -160,7 +160,7 @@ class _CreateTransactionSheetState
                     Text(
                       '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
                       style:
-                          const TextStyle(color: AppColors.textPrimary),
+                          TextStyle(color: context.cTextPrimary),
                     ),
                   ],
                 ),
@@ -176,7 +176,7 @@ class _CreateTransactionSheetState
                 prefixIcon: Icon(Icons.note_outlined,
                     color: AppColors.textSecondary),
               ),
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: context.cTextPrimary),
             ),
             const SizedBox(height: 24),
 
@@ -202,7 +202,7 @@ class _CreateTransactionSheetState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.cCard,
         borderRadius: BorderRadius.circular(12),
       ),
       child: DropdownButtonHideUnderline(
@@ -216,13 +216,13 @@ class _CreateTransactionSheetState
                   style: const TextStyle(color: AppColors.textSecondary)),
             ],
           ),
-          dropdownColor: AppColors.card,
+          dropdownColor: context.cCard,
           isExpanded: true,
           items: items.map((item) {
             return DropdownMenuItem(
               value: getId(item),
               child: Text(getLabel(item),
-                  style: const TextStyle(color: AppColors.textPrimary)),
+                  style: TextStyle(color: context.cTextPrimary)),
             );
           }).toList(),
           onChanged: onChanged,
@@ -240,9 +240,9 @@ class _CreateTransactionSheetState
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
+            colorScheme: ColorScheme.dark(
               primary: AppColors.accent,
-              surface: AppColors.card,
+              surface: context.cCard,
             ),
           ),
           child: child!,
@@ -302,7 +302,7 @@ class _TypeButton extends StatelessWidget {
           decoration: BoxDecoration(
             color: isSelected
                 ? color.withValues(alpha: 0.15)
-                : AppColors.background,
+                : context.cBg,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isSelected ? color : Colors.transparent,

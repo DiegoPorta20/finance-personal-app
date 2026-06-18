@@ -13,7 +13,7 @@ class TransactionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final isIncome = transaction.type == 'income';
     final sign = isIncome ? '+' : '-';
-    final amountColor = isIncome ? AppColors.accent : AppColors.textPrimary;
+    final amountColor = isIncome ? AppColors.accent : context.cTextPrimary;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -23,12 +23,12 @@ class TransactionTile extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppColors.card,
+              color: context.cCard,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               _mapIcon(transaction.categoryIcon),
-              color: AppColors.textSecondary,
+              color: context.cTextSecondary,
               size: 20,
             ),
           ),

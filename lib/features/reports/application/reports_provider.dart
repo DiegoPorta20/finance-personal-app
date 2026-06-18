@@ -35,6 +35,33 @@ final categorySpendingProvider =
   }).toList();
 });
 
+final incomeCategoryProvider =
+    FutureProvider<List<CategorySpending>>((ref) async {
+  final repo = ref.read(analyticsRepositoryProvider);
+  final period = ref.watch(reportPeriodProvider);
+  final range = period.range(DateTime.now());
+
+  final data = await repo.incomeByCategory(
+    range.start.toIso8601String(),
+    range.end.toIso8601String(),
+  );
+
+  final total = data.fold<int>(
+    0,
+    (sum, d) => sum + (d['totalAmount'] as int? ?? 0),
+  );
+
+  return data.map((d) {
+    final amount = d['totalAmount'] as int? ?? 0;
+    return CategorySpending(
+      categoryName: d['categoryName'] as String? ?? '',
+      categoryIcon: d['categoryIcon'] as String? ?? 'more_horiz',
+      totalAmount: amount,
+      percentage: total > 0 ? (amount / total * 100) : 0,
+    );
+  }).toList();
+});
+
 final monthlyComparisonProvider =
     FutureProvider<List<MonthlyComparison>>((ref) async {
   final repo = ref.read(analyticsRepositoryProvider);

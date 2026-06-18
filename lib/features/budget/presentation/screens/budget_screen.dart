@@ -27,7 +27,7 @@ class BudgetScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.card,
+                color: context.cCard,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Column(
@@ -143,7 +143,7 @@ class _BudgetTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.card,
+          color: context.cCard,
           borderRadius: BorderRadius.circular(14),
         ),
         child: Column(

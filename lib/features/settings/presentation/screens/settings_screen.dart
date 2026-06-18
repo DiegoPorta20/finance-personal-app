@@ -112,7 +112,7 @@ class _SettingsSection extends StatelessWidget {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.card,
+            color: context.cCard,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(children: children),
@@ -139,7 +139,7 @@ class _SettingsTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: Icon(icon, color: AppColors.textSecondary),
-      title: Text(title, style: const TextStyle(color: AppColors.textPrimary)),
+      title: Text(title, style: TextStyle(color: context.cTextPrimary)),
       subtitle: subtitle != null
           ? Text(subtitle!, style: const TextStyle(color: AppColors.textSecondary))
           : null,

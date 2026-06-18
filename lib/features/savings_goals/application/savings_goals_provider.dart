@@ -26,6 +26,12 @@ class SavingsGoalsNotifier extends AsyncNotifier<List<SavingsGoal>> {
     ref.invalidateSelf();
   }
 
+  Future<void> updateGoal(String id, String name, int targetAmount) async {
+    final repo = ref.read(savingsGoalsRepositoryProvider);
+    await repo.update(id, {'name': name, 'targetAmount': targetAmount});
+    ref.invalidateSelf();
+  }
+
   Future<void> addFunds(String id, int amount) async {
     final repo = ref.read(savingsGoalsRepositoryProvider);
     await repo.addFunds(id, amount);

@@ -66,15 +66,31 @@ class IncomeExpenseBarChart extends ConsumerWidget {
                           },
                         ),
                       ),
-                      leftTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false)),
+                      leftTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 48,
+                          getTitlesWidget: (value, meta) {
+                            if (value == 0) return const SizedBox.shrink();
+                            return Text(_compactMoney(value),
+                                style: const TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 10));
+                          },
+                        ),
+                      ),
                       topTitles: const AxisTitles(
                           sideTitles: SideTitles(showTitles: false)),
                       rightTitles: const AxisTitles(
                           sideTitles: SideTitles(showTitles: false)),
                     ),
                     borderData: FlBorderData(show: false),
-                    gridData: const FlGridData(show: false),
+                    gridData: FlGridData(
+                      show: true,
+                      drawVerticalLine: false,
+                      getDrawingHorizontalLine: (value) =>
+                          FlLine(color: AppColors.divider, strokeWidth: 1),
+                    ),
                     barGroups: months.asMap().entries.map((entry) {
                       final i = entry.key;
                       final m = entry.value;
@@ -84,16 +100,16 @@ class IncomeExpenseBarChart extends ConsumerWidget {
                           BarChartRodData(
                             toY: m.income / 100,
                             color: AppColors.accent,
-                            width: 12,
+                            width: 14,
                             borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(4)),
+                                top: Radius.circular(6)),
                           ),
                           BarChartRodData(
                             toY: m.expense / 100,
                             color: AppColors.error,
-                            width: 12,
+                            width: 14,
                             borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(4)),
+                                top: Radius.circular(6)),
                           ),
                         ],
                       );
@@ -107,6 +123,14 @@ class IncomeExpenseBarChart extends ConsumerWidget {
       },
     );
   }
+}
+
+String _compactMoney(double value) {
+  if (value.abs() >= 1000) {
+    final k = value / 1000;
+    return '\$${k.toStringAsFixed(k.truncateToDouble() == k ? 0 : 1)}k';
+  }
+  return '\$${value.toInt()}';
 }
 
 class _LegendDot extends StatelessWidget {

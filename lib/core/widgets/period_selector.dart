@@ -4,8 +4,8 @@ import '../theme/app_theme.dart';
 import '../utils/time_period.dart';
 
 /// Barra reutilizable de selección de periodo (Diario/Semanal/Mensual/Anual).
-/// Texto verde + subrayado en el periodo activo. Es "tonto": recibe el valor
-/// seleccionado y notifica los cambios por [onChanged].
+/// Estilo "segmentado": el periodo activo es una pastilla verde. Es "tonto":
+/// recibe el valor seleccionado y notifica los cambios por [onChanged].
 class PeriodSelector extends StatelessWidget {
   final TimePeriod selected;
   final ValueChanged<TimePeriod> onChanged;
@@ -19,40 +19,36 @@ class PeriodSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      color: AppColors.background,
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: context.cCard,
+        borderRadius: BorderRadius.circular(14),
+      ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: TimePeriod.values.map((period) {
           final active = period == selected;
-          return InkWell(
-            onTap: () => onChanged(period),
-            borderRadius: BorderRadius.circular(8),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => onChanged(period),
+              behavior: HitTestBehavior.opaque,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 9),
+                decoration: BoxDecoration(
+                  color: active ? AppColors.accent : Colors.transparent,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Center(
+                  child: Text(
                     period.label,
                     style: TextStyle(
-                      color:
-                          active ? AppColors.accent : AppColors.textSecondary,
+                      color: active ? Colors.black : AppColors.textSecondary,
                       fontWeight: active ? FontWeight.bold : FontWeight.w500,
-                      fontSize: 15,
+                      fontSize: 13.5,
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  Container(
-                    height: 3,
-                    width: 22,
-                    decoration: BoxDecoration(
-                      color: active ? AppColors.accent : Colors.transparent,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           );

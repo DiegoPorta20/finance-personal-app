@@ -131,7 +131,7 @@ class _TransactionItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final isIncome = transaction.isIncome;
     final sign = isIncome ? '+' : '-';
-    final amountColor = isIncome ? AppColors.accent : AppColors.textPrimary;
+    final amountColor = isIncome ? AppColors.accent : context.cTextPrimary;
     final dateFormat = DateFormat('dd MMM, HH:mm');
 
     return Padding(
@@ -139,7 +139,7 @@ class _TransactionItem extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.card,
+          color: context.cCard,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -148,7 +148,7 @@ class _TransactionItem extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: AppColors.background,
+                color: context.cBg,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(

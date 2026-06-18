@@ -112,8 +112,8 @@ class _NotificationTile extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: notification.read
-                ? AppColors.card
-                : AppColors.card.withValues(alpha: 0.9),
+                ? context.cCard
+                : context.cCard.withValues(alpha: 0.9),
             borderRadius: BorderRadius.circular(16),
             border: notification.read
                 ? null

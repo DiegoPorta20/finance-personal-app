@@ -19,7 +19,7 @@ class SavingsGoalsScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Metas de Ahorro')),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.accent,
-        onPressed: () => _showCreateDialog(context, ref),
+        onPressed: () => _showGoalSheet(context, ref),
         child: const Icon(Icons.add, color: Colors.black),
       ),
       body: goalsAsync.when(
@@ -51,12 +51,18 @@ class SavingsGoalsScreen extends ConsumerWidget {
             child: ListView.builder(
               padding: const EdgeInsets.all(20),
               itemCount: goals.length,
-              itemBuilder: (context, index) => _GoalCard(
-                goal: goals[index],
-                onAddFunds: (id, amount) => ref
-                    .read(savingsGoalsProvider.notifier)
-                    .addFunds(id, amount),
-              ),
+              itemBuilder: (context, index) {
+                final goal = goals[index];
+                return GestureDetector(
+                  onTap: () => _showGoalSheet(context, ref, goal: goal),
+                  child: _GoalCard(
+                    goal: goal,
+                    onAddFunds: (id, amount) => ref
+                        .read(savingsGoalsProvider.notifier)
+                        .addFunds(id, amount),
+                  ),
+                );
+              },
             ),
           );
         },
@@ -64,15 +70,16 @@ class SavingsGoalsScreen extends ConsumerWidget {
     );
   }
 
-  void _showCreateDialog(BuildContext context, WidgetRef ref) {
+  void _showGoalSheet(BuildContext context, WidgetRef ref,
+      {SavingsGoal? goal}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.card,
+      backgroundColor: context.cCard,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => _CreateGoalSheet(ref: ref),
+      builder: (context) => _GoalSheet(ref: ref, goal: goal),
     );
   }
 }
@@ -94,7 +101,7 @@ class _GoalCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: AppColors.card,
+          color: context.cCard,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
@@ -208,12 +215,12 @@ class _GoalCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.card,
+        backgroundColor: context.cCard,
         title: const Text('Abonar a meta'),
         content: TextField(
           controller: controller,
           decoration: const InputDecoration(hintText: 'Monto (ej: 100.00)'),
-          style: const TextStyle(color: AppColors.textPrimary),
+          style: TextStyle(color: context.cTextPrimary),
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           autofocus: true,
         ),
@@ -276,18 +283,31 @@ class _GoalRingPainter extends CustomPainter {
       oldDelegate.progress != progress;
 }
 
-class _CreateGoalSheet extends StatefulWidget {
+class _GoalSheet extends StatefulWidget {
   final WidgetRef ref;
+  final SavingsGoal? goal;
 
-  const _CreateGoalSheet({required this.ref});
+  const _GoalSheet({required this.ref, this.goal});
 
   @override
-  State<_CreateGoalSheet> createState() => _CreateGoalSheetState();
+  State<_GoalSheet> createState() => _GoalSheetState();
 }
 
-class _CreateGoalSheetState extends State<_CreateGoalSheet> {
+class _GoalSheetState extends State<_GoalSheet> {
   final _nameController = TextEditingController();
   final _amountController = TextEditingController();
+
+  bool get _isEditing => widget.goal != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final goal = widget.goal;
+    if (goal != null) {
+      _nameController.text = goal.name;
+      _amountController.text = (goal.targetAmount / 100).toStringAsFixed(2);
+    }
+  }
 
   @override
   void dispose() {
@@ -317,13 +337,13 @@ class _CreateGoalSheetState extends State<_CreateGoalSheet> {
             ),
           ),
           const SizedBox(height: 20),
-          Text('Nueva meta de ahorro',
+          Text(_isEditing ? 'Editar meta' : 'Nueva meta de ahorro',
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 20),
           TextField(
             controller: _nameController,
             decoration: const InputDecoration(hintText: 'Nombre de la meta'),
-            style: const TextStyle(color: AppColors.textPrimary),
+            style: TextStyle(color: context.cTextPrimary),
             autofocus: true,
           ),
           const SizedBox(height: 12),
@@ -334,7 +354,7 @@ class _CreateGoalSheetState extends State<_CreateGoalSheet> {
               prefixIcon:
                   Icon(Icons.attach_money, color: AppColors.textSecondary),
             ),
-            style: const TextStyle(color: AppColors.textPrimary),
+            style: TextStyle(color: context.cTextPrimary),
             keyboardType:
                 const TextInputType.numberWithOptions(decimal: true),
           ),
@@ -346,12 +366,17 @@ class _CreateGoalSheetState extends State<_CreateGoalSheet> {
               if (name.isEmpty || amountText.isEmpty) return;
               final amount = double.tryParse(amountText);
               if (amount == null || amount <= 0) return;
-              widget.ref
-                  .read(savingsGoalsProvider.notifier)
-                  .addGoal(name, (amount * 100).round(), null);
+              final notifier =
+                  widget.ref.read(savingsGoalsProvider.notifier);
+              final goal = widget.goal;
+              if (goal == null) {
+                notifier.addGoal(name, (amount * 100).round(), null);
+              } else {
+                notifier.updateGoal(goal.id, name, (amount * 100).round());
+              }
               Navigator.of(context).pop();
             },
-            child: const Text('Crear meta'),
+            child: Text(_isEditing ? 'Guardar cambios' : 'Crear meta'),
           ),
         ],
       ),

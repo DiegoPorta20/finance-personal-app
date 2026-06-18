@@ -21,6 +21,12 @@ class IncomeSourcesNotifier extends AsyncNotifier<List<IncomeSource>> {
     ref.invalidateSelf();
   }
 
+  Future<void> updateSource(String id, Map<String, dynamic> data) async {
+    final repo = ref.read(incomeSourcesRepositoryProvider);
+    await repo.update(id, data);
+    ref.invalidateSelf();
+  }
+
   Future<void> remove(String id) async {
     final repo = ref.read(incomeSourcesRepositoryProvider);
     await repo.delete(id);
