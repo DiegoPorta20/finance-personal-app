@@ -50,18 +50,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: AppColors.accent,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Icon(
-                    Icons.account_balance_wallet,
-                    size: 40,
-                    color: Colors.black,
-                  ),
+                Image.asset(
+                  'assets/images/logo.png',
+                  width: 120,
+                  height: 120,
                 ),
                 const SizedBox(height: 24),
                 Text(
